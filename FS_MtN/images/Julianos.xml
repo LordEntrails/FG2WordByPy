@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root version="5.1" dataversion="20260124">
+	<gridtype>hexrow</gridtype>
+	<gridsize>116.3,116.3</gridsize>
+	<gridoffset>-231.0999,67</gridoffset>
+	<color>#FFFFFFFF</color>
+	<distancebaseunit>110</distancebaseunit>
+	<distancesuffix>km</distancesuffix>
+</root>
