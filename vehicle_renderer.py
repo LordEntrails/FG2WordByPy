@@ -1,14 +1,12 @@
 import os
 import io
+import docx.oxml as oxml
+import docx.oxml.ns as ns
 from docx.shared import Inches
 from docxtpl import DocxTemplate, RichText
 from PIL import Image as PILImage
 
 def create_vehicle_image_subdoc(tpl, mod_zip, asset_path, target_width):
-    """
-    Creates an inline sub-document using explicit Pillow pixel mapping
-    to lock true vehicle asset aspect ratios cleanly.
-    """
     if not asset_path:
         return ""
     if "@" in asset_path:
@@ -29,10 +27,9 @@ def create_vehicle_image_subdoc(tpl, mod_zip, asset_path, target_width):
             
         subdoc = tpl.new_subdoc()
         p = subdoc.add_paragraph()
-        p.alignment = 1  # Centered
+        p.alignment = 1
         p.add_run().add_picture(output_stream, width=Inches(target_width), height=Inches(target_height))
         return subdoc
-
     except KeyError:
         return f"[MISSING MODULE ASSET: {asset_path}]"
     except Exception as e:
@@ -40,9 +37,6 @@ def create_vehicle_image_subdoc(tpl, mod_zip, asset_path, target_width):
         return f"[CORRUPT ASSET: {asset_path}]"
 
 def render_vehicle_appendix(mod_zip, vehicles_data, master_doc, template_path, appendix_label=""):
-    """
-    Compiles the parsed vehicle catalog array into the master document.
-    """
     if not os.path.exists(template_path):
         print(f"[!] Error: Vehicle renderer blueprint missing: '{template_path}'")
         return False
@@ -52,8 +46,23 @@ def render_vehicle_appendix(mod_zip, vehicles_data, master_doc, template_path, a
 
     for vehicle in vehicles_data:
         raw = vehicle["raw_node"]
+        raw_id = raw.tag
+        bookmark_name = f"REF_VEHICLE_{raw_id}"
+
+        # --- INJECT INTERNAL LINK BOOKMARK ---
+        bookmark_subdoc = tpl.new_subdoc()
+        p_book = bookmark_subdoc.add_paragraph()
         
-        # 1. Image extraction passes matching your XML parameters
+        b_start = oxml.shared.OxmlElement('w:bookmarkStart')
+        b_start.set(ns.qn('w:id'), raw_id.replace("id-", ""))
+        b_start.set(ns.qn('w:name'), bookmark_name)
+        p_book._p.append(b_start)
+        
+        b_end = oxml.shared.OxmlElement('w:bookmarkEnd')
+        b_end.set(ns.qn('w:id'), raw_id.replace("id-", ""))
+        p_book._p.append(b_end)
+        
+        # Image extraction passes
         pic_path = raw.findtext("picture") or ""
         token_flat = raw.findtext("token") or ""
         token_cam = raw.findtext("token3Dflat") or ""
@@ -62,7 +71,7 @@ def render_vehicle_appendix(mod_zip, vehicles_data, master_doc, template_path, a
         vehicle["token_flat"] = create_vehicle_image_subdoc(tpl, mod_zip, token_flat, target_width=1.7)
         vehicle["token_camera"] = create_vehicle_image_subdoc(tpl, mod_zip, token_cam, target_width=1.7)
 
-        # 2. Extract description text from the <notes> node layout cleanly
+        # Extract description text
         notes_node = raw.find("notes")
         if notes_node is not None and len(notes_node.findall('p')) > 0:
             rt = RichText()
