@@ -1,0 +1,204 @@
+<location>
+		<id-00001>
+			<gmnotes type="formattedtext">
+				<p />
+			</gmnotes>
+			<name type="string">Nagol</name>
+			<sublocations />
+			<text type="formattedtext">
+				<h>Primary Star</h>
+				<p>
+					<b>Class: </b>M-VI</p>
+				<p>
+					<b>Color: </b>Red (sub-dwarf)</p>
+				<p>
+					<b>Stellar Mass: </b>0.2</p>
+				<p>
+					<b>FTL Horizon: </b>0.18 AU <i /></p>
+				<h>Astronomical Objects</h>
+				<p>
+					<b>Habitable (zone 3): </b>Dwarf Planetoid, 0.16 AU</p>
+				<linklist>
+					<link class="location" recordname="location.id-00002">Location: Julianos</link>
+				</linklist>
+			</text>
+			<type type="string">System</type>
+		</id-00001>
+		<id-00002>
+			<gmnotes type="formattedtext">
+				<p />
+			</gmnotes>
+			<name type="string">Julianos</name>
+			<sublocations />
+			<text type="formattedtext">
+				<table>
+					<tr>
+						<td>Dominant Lifeform:</td>
+						<td>Animal, omnivore</td>
+					</tr>
+					<tr>
+						<td>Description:</td>
+						<td>Swathes of lush rain-forest dominate the equatorial regions, which transitions to marsh and broken plains near the poles.</td>
+					</tr>
+				</table>
+				<h>Physical Data</h>
+				<table>
+					<tr>
+						<td>Zone:</td>
+						<td>Habitable</td>
+					</tr>
+					<tr>
+						<td>Orbit:</td>
+						<td>0.16 AU</td>
+					</tr>
+					<tr>
+						<td>Gravity:</td>
+						<td>0.87 g</td>
+					</tr>
+					<tr>
+						<td>Diameter:</td>
+						<td>0.11</td>
+					</tr>
+					<tr>
+						<td>Mass:</td>
+						<td>0.011</td>
+					</tr>
+					<tr>
+						<td># Moons:</td>
+						<td>1</td>
+					</tr>
+					<tr>
+						<td>Rings:</td>
+						<td>None</td>
+					</tr>
+					<tr>
+						<td>Axial Tilt:</td>
+						<td>2 degrees</td>
+					</tr>
+					<tr>
+						<td>Length of Day:</td>
+						<td>2315 standard hours</td>
+					</tr>
+					<tr>
+						<td>Length of Year:</td>
+						<td>3 local daysl (345 standard (20hr) days)</td>
+					</tr>
+				</table>
+				<linklist>
+					<link class="imagewindow" recordname="image.id-00004">Image: Julianos</link>
+				</linklist>
+				<h>Hydrospheric Data</h>
+				<table>
+					<tr>
+						<td>% Water:</td>
+						<td>17</td>
+					</tr>
+					<tr>
+						<td>Toxicity:</td>
+						<td>Trace Hazard</td>
+					</tr>
+				</table>
+				<h>Atmospheric Data</h>
+				<table>
+					<tr>
+						<td>Pressure:</td>
+						<td>Normal, no hazard</td>
+					</tr>
+					<tr>
+						<td>Toxicity:</td>
+						<td>Severe Hazard (EM Storm)</td>
+					</tr>
+				</table>
+				<h>Surface Data</h>
+				<table>
+					<tr>
+						<td>Radiation:</td>
+						<td>Trace Hazard</td>
+					</tr>
+					<tr>
+						<td>Temperature:</td>
+						<td>Normal, no hazard</td>
+					</tr>
+					<tr>
+						<td>Dominant Terrain:</td>
+						<td>Jungle, Marsh</td>
+					</tr>
+				</table>
+			</text>
+			<type type="string">Planet</type>
+		</id-00002>
+		<id-00003>
+			<gmnotes type="formattedtext">
+				<p>This was one of the planetary definse sites that was destroyed by a targeted kinetic meteor that destroyed the facility.</p>
+				<linklist>
+					<link class="location" recordname="location.id-00006">Location: Planetary Defense, Ruined</link>
+				</linklist>
+			</gmnotes>
+			<name type="string">Meadows</name>
+			<sublocations />
+			<text type="formattedtext">
+				<p>Situated in a large meadow near the foothills of a regional mountain chain. This location was selected as a dig site as orbital scans indicated an unnatural crater centered at this location, with large concentrations of rare isotopes, that was later filled by erosion.</p>
+				<p>Institute structures Includes a large covered dome (not fully enclosed) where excavation occurs in the summers. Several outbuildings including a garage and two living quarters. Research indicates it was an agricultural trade center. Explanation for the isotopes is inconclusive.</p>
+				<p>Currently &#8220;closed&#8221; up for winter, no sign of recent activities Explorer and Bots are in long term storage and can be re-activated.</p>
+			</text>
+			<type type="string">Archealogical Site</type>
+		</id-00003>
+		<id-00004>
+			<gmnotes type="formattedtext">
+				<p>Summer site and where Team Alpha is expected to be. Shows signs of aerial assault. Explorer missing.</p>
+			</gmnotes>
+			<name type="string">Aevum</name>
+			<sublocations />
+			<text type="formattedtext">
+				<p>This site sits on a hill above a river. It includes underground structures that may have been either hydro-power generation or a sub-surface water supply network.</p>
+				<p>Institute structures include a connected set of small residences near the hill top, a protective building and laboratory over the sub-structure entrance, and a vehicle garage at the hill base.</p>
+			</text>
+			<type type="string">Archealogical Site</type>
+		</id-00004>
+		<id-00005>
+			<gmnotes type="formattedtext">
+				<p>Currently just emerging from winter season and has not yet been activated by the Institute&#8217;s team.</p>
+			</gmnotes>
+			<name type="string">Sanders</name>
+			<sublocations />
+			<text type="formattedtext">
+				<p>Named for an exploration team member who died. This site sits in the marshes near the coast and consists of numerous ruined structures including several large hardened pads and what may have been landing strips. This was the first site identified and is believed to have been a spaceport.</p>
+				<p>Institute structures include a VTOL landing facility, residences, and both land and water vehicle storage.</p>
+			</text>
+			<type type="string">Archealogical Site</type>
+		</id-00005>
+		<id-00006>
+			<gmnotes type="formattedtext">
+				<p>This was one of the planetary definse sites that was destroyed by a inter-planetary war.</p>
+			</gmnotes>
+			<name type="string">Planetary Defense, Ruined</name>
+			<sublocations />
+			<text type="formattedtext">
+				<p />
+			</text>
+			<type type="string">Structure</type>
+		</id-00006>
+		<id-00007>
+			<gmnotes type="formattedtext">
+				<h>Planetary Defense</h>
+				<p>An emitter and control center for a planetary defense shield that provied a global Guass screen for the planet. It now powers the massive ElectroMagnetic storm</p>
+			</gmnotes>
+			<name type="string">Poly Dome Structure</name>
+			<sublocations />
+			<text type="formattedtext">
+				<p>An unsual domes structure that is made out of poly compounds. The structure has no metals in it's construction and appears to have no means of entry.</p>
+			</text>
+			<type type="string">Structure</type>
+		</id-00007>
+		<id-00008>
+			<gmnotes type="formattedtext">
+				<p>Location TBD, near Aevrum?</p>
+			</gmnotes>
+			<name type="string">Alien Crash</name>
+			<sublocations />
+			<text type="formattedtext">
+				<p />
+			</text>
+			<type type="string">Site</type>
+		</id-00008>
+	</location>

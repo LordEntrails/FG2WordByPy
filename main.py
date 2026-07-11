@@ -4,10 +4,10 @@ import xml.etree.ElementTree as ET
 from docx import Document
 import fg_parser
 import word_renderer
+from ruleset_factory import RulesetFactory
 
-# Global Target Layout Controls
+# Master File and Global Output Targets
 MOD_FILE = "FS_MtN.mod"
-TEMPLATE_FILE = "FrontierSpace_Template.docx"
 OUTPUT_FILE = "Mission_to_Nagol_Campaign.docx"
 
 def main():
@@ -23,7 +23,7 @@ def main():
         mod_zip = zipfile.ZipFile(MOD_FILE, 'r')
         
         # =====================================================================
-        # 1. VALIDATE SYSTEM METADATA (definition.xml)
+        # 1. VALIDATE SYSTEM METADATA & INITIALIZE FACTORY (definition.xml)
         # =====================================================================
         try:
             with mod_zip.open('definition.xml') as def_file:
@@ -32,10 +32,14 @@ def main():
                 
             ruleset_node = def_root.find('ruleset')
             ruleset_name = ruleset_node.text.strip() if ruleset_node is not None else "Unknown"
-            print(f"[SYSTEM] Module metadata verified. Active Ruleset: '{ruleset_name}'")
         except KeyError:
             print("[WARNING] definition.xml missing from archive package. Defaulting validation pass.")
             ruleset_name = "Unknown"
+
+        print(f"[SYSTEM] Module metadata verified. Active Ruleset: '{ruleset_name}'")
+        
+        # Instantiate the dynamic routing factory
+        rf = RulesetFactory(ruleset_name)
 
         # =====================================================================
         # 2. LOAD CAMPAIGN DATABASE (db.xml)
@@ -49,12 +53,14 @@ def main():
             mod_zip.close()
             return
 
-        # Harvest structural elements via parser
-        story_pages = fg_parser.harvest_ordered_story_pages(db_root)
-        npcs = fg_parser.get_npc_catalog(db_root)
-        
-        # Open Blueprint Template and wipe temporary text frames
-        doc = Document(TEMPLATE_FILE)
+        # Open rule-specific Master Blueprint Template and wipe temporary text frames
+        story_template = rf.get_template_path("story")  # Dynamically points to 'FS_Story_Template.docx'
+        if not os.path.exists(story_template):
+            print(f"[!] Critical Error: Core layout blueprint template missing: '{story_template}'")
+            mod_zip.close()
+            return
+
+        doc = Document(story_template)
         for paragraph in doc.paragraphs:
             p_element = paragraph._element
             p_element.getparent().remove(p_element)
@@ -65,20 +71,22 @@ def main():
         # 3. WRITE BOOK STRUCTURES SEQUENTIALLY
         # =====================================================================
         print(f"Processing structured narrative hierarchy...")
+        story_pages = fg_parser.harvest_ordered_story_pages(db_root)
+        
         for element in story_pages:
             item_type = element[0]
             
             if item_type == 'chapter':
-                doc.add_heading(element[1], level=1) # Main Book Chapters
+                doc.add_heading(element[1], level=1)
                 
             elif item_type == 'subchapter':
-                doc.add_heading(element[1], level=2) # Sub-chapters
+                doc.add_heading(element[1], level=2)
                 
             elif item_type == 'page':
                 page_name = element[1]
                 page_node = element[2]
                 
-                doc.add_heading(page_name, level=3) # Page Title
+                doc.add_heading(page_name, level=3)
                 
                 blocks_node = page_node.find('blocks')
                 if blocks_node is not None:
@@ -118,6 +126,7 @@ def main():
         # =====================================================================
         # 4. WRITE MASTER NPC DOSSIERS
         # =====================================================================
+        npcs = fg_parser.get_npc_catalog(db_root)
         if npcs:
             import npc_renderer
             print(f"\n[DEBUG] Total Categories Found: {len(npcs)}")
@@ -125,8 +134,36 @@ def main():
                 display_name = c['name'] if not c['is_unassigned'] else "Uncategorized/Loose"
                 print(f"  -> Category: '{display_name}' (Contains {len(c['npcs'])} NPCs)")
                 
-            npc_renderer.render_npc_appendix(mod_zip, npcs, doc, "FrontierSpace_NPC_Template.docx")
-            
+            npc_template = rf.get_template_path("npc")  # Resolves dynamically to 'FS_NPC_Template.docx'
+            npc_renderer.render_npc_appendix(mod_zip, npcs, doc, npc_template)
+
+        # =====================================================================
+        # 4.5 WRITE EQUIPMENT & ITEM LOGS
+        # =====================================================================
+        items_data = fg_parser.get_item_catalog(db_root)
+        if items_data:
+            import item_renderer
+            item_template = rf.get_template_path("item")  # Resolves dynamically to 'FS_Item_Template.docx'
+            item_renderer.render_item_appendix(mod_zip, items_data, doc, item_template)
+        else:
+            print("[INFO] No inventory items detected inside the campaign module.")
+        
+        # =====================================================================
+        # 4.6 WRITE VEHICLE & HULL ENTRIES (APPENDIX C)
+        # =====================================================================
+        vehicles_data = rf.execute_parser("vehicle", db_root)  # Dynamically executes fs_vehicle_parser
+        if vehicles_data:
+            import vehicle_renderer
+            vehicle_template = rf.get_template_path("vehicle")  # Resolves dynamically to 'FS_Vehicle_Template.docx'
+            vehicle_renderer.render_vehicle_appendix(
+                mod_zip=mod_zip, 
+                vehicles_data=vehicles_data, 
+                master_doc=doc, 
+                template_path=vehicle_template
+            )
+        else:
+            print("[INFO] No data objects populated. Vehicle pipeline bypassed.")
+
         # =====================================================================
         # 5. SAVE AND CLOSE
         # =====================================================================
@@ -136,7 +173,9 @@ def main():
         print(f"Generated structured module workbook: {OUTPUT_FILE}")
         
     except Exception as e:
+        import traceback
         print(f"\nProcessing Pipeline Failure: {e}")
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()

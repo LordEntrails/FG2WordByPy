@@ -1,0 +1,264 @@
+	<item>
+		<id-00001>
+			<aoe_cb type="number">0</aoe_cb>
+			<cost type="string">600</cost>
+			<count type="number">1</count>
+			<cu_required type="number">0</cu_required>
+			<damage type="string">3D</damage>
+			<damage_alt_dr type="dice"></damage_alt_dr>
+			<damage_dr type="dice">3d10</damage_dr>
+			<integrated_cb type="number">0</integrated_cb>
+			<item_description type="formattedtext">
+				<p>Description: When you really want to make an impression on your enemies, walk casually towards them firing off shot after shot with an assault shotgun. It&#8217;s loud and powerful, produces a powerful kick, and its scattershot fires in a wide enough area that you don&#8217;t have to be too accurate to paint a target with pain. A pump- action chambers the first round, but thereafter it shoots one scattershot from its 10-shot box magazine payload every time the trigger is pulled, causing 3D damage to targets within its listed range increment. Like all scattershot, it loses effectiveness with range. Each range increment beyond the first reduces the damage by 1D, until it&#8217;s out of damage dice and then just causes cosmetic damage and annoys people.</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Weapon</item_type>
+			<item_typevalue type="string">weapon</item_typevalue>
+			<name type="string">Assault Shotgun (Copy)</name>
+			<payload type="string">scatershot</payload>
+			<picture type="token">images/Assault Shotgun.webp@FS Players Handbook</picture>
+			<RadioList1 type="string">passive</RadioList1>
+			<range type="string">15m</range>
+			<subtype type="string">rifle</subtype>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<training type="string">CRD+Marksman</training>
+			<usage type="string">1</usage>
+			<weight type="number">0</weight>
+		</id-00001>
+		<id-00002>
+			<aoe_cb type="number">0</aoe_cb>
+			<cost type="string">10000</cost>
+			<count type="number">1</count>
+			<cu_required type="number">0</cu_required>
+			<damage type="string">2Dx10</damage>
+			<damage_alt_dr type="dice"></damage_alt_dr>
+			<damage_dr type="dice">20d10</damage_dr>
+			<damagetype type="string">hullpoints</damagetype>
+			<integrated_cb type="number">0</integrated_cb>
+			<item_description type="formattedtext">
+				<p>A short-range weapon often used to keep boarding parties at bay, each time a rocket hits it causes 2Dx10 damage. The self- propelled rocket has no internal guidance system but relies on the skill of the gunner.</p>
+			</item_description>
+			<item_type type="string">Weapon</item_type>
+			<item_typevalue type="string">weapon</item_typevalue>
+			<name type="string">Assault Rocket (Copy)</name>
+			<payload type="string">shot</payload>
+			<range type="string">2</range>
+			<subtype type="string">heavy</subtype>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<training type="string">CRD+Marksman</training>
+			<usage type="string">1</usage>
+			<weight type="number">0</weight>
+		</id-00002>
+		<id-00003>
+			<aoe_cb type="number">0</aoe_cb>
+			<count type="number">1</count>
+			<cu_required type="number">0</cu_required>
+			<damage_alt_dr type="dice"></damage_alt_dr>
+			<damage_dr type="dice"></damage_dr>
+			<integrated_cb type="number">1</integrated_cb>
+			<item_description type="formattedtext">
+				<p>A starship A.I. is treated similar to a Digital Assistant, though it automatically has the Pilot skill with a score of +0 in addition to other skill choices normally available to a Digital Assistant. It can use this skill with its INT score to pilot the ship, counting as 1 crew member towards the ship&#8217;s crew requirement. The A.I. may use all equipment integrated into the starship, though without removing its violence interlock it may not engage in activities it believes will kill living beings. Players who want more advanced A.I. in their starship can purchase the equivalent of high-tech or cutting- edge Digital Assistants (refer to Chapter 5, Equipment &#38; Technology). A starship A.I. counts as one integration space, but the CU and cost varies according to the integrated tech table.</p>
+			</item_description>
+			<item_type type="string">Vehicle</item_type>
+			<name type="string">Artificial Intelligence (Copy)</name>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<veh_subtype type="string">equipment</veh_subtype>
+			<weight type="number">0</weight>
+		</id-00003>
+		<id-00004>
+			<aoe_cb type="number">0</aoe_cb>
+			<cost type="string">100000</cost>
+			<count type="number">1</count>
+			<cu_required type="number">0</cu_required>
+			<damage_alt_dr type="dice"></damage_alt_dr>
+			<damage_dr type="dice"></damage_dr>
+			<integrated_cb type="number">0</integrated_cb>
+			<item_description type="formattedtext">
+				<p>This is used to defend a ship against a single rocket or missile. It releases a barrage of white noise, thermal chaff, micro-grav buoys, and bursts of electronic scrambler broadcasters that interfere with the guidance system or interpose an incoming warhead. It drains 5 capacitors to enable the anti-missile defense system, and nullifies 1 rocket/missile.</p>
+			</item_description>
+			<item_type type="string">Defense</item_type>
+			<item_typevalue type="string">defense</item_typevalue>
+			<name type="string">Anti-Missle Defense (Copy)</name>
+			<protection type="string">5 Cap/Prjtl</protection>
+			<protectionType type="string">special</protectionType>
+			<suit_screen_radio type="string">other</suit_screen_radio>
+			<weight type="number">0</weight>
+		</id-00004>
+		<id-00005>
+			<count type="number">1</count>
+			<item_description type="formattedtext">
+				<p />
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Gear</item_type>
+			<item_typevalue type="string">gear</item_typevalue>
+			<name type="string">All-Weather Blanket (Copy)</name>
+			<RadioList1 type="string">passive</RadioList1>
+			<weight type="number">0</weight>
+		</id-00005>
+		<id-00006>
+			<aoe_cb type="number">0</aoe_cb>
+			<count type="number">1</count>
+			<cu_required type="number">0</cu_required>
+			<damage_alt_dr type="dice"></damage_alt_dr>
+			<damage_dr type="dice"></damage_dr>
+			<integrated_cb type="number">1</integrated_cb>
+			<item_description type="formattedtext">
+				<p>A series of plasma injectors that give momentary boosts of extreme thrust. There are 10 boosts that will double the acceleration rate of the vehicle for one turn. If the boost is used while at top speed, the vehicle will temporarily be permitted to exceed it, but will slow back down to top speed after a few turns. A plasma canister of 10 boosts costs only 100&#169;. For each boost, there is a 10% chance the plasma will fail to ignite. On a roll of 95-99 the after burner is damaged and must be replaced.</p>
+			</item_description>
+			<item_type type="string">Vehicle</item_type>
+			<name type="string">After Burner Package (Copy)</name>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<veh_subtype type="string">equipment</veh_subtype>
+			<weight type="number">0</weight>
+		</id-00006>
+		<id-00007>
+			<active type="string">detailed 3D hologram for later analysis  </active>
+			<cost type="string">200</cost>
+			<count type="number">1</count>
+			<item_description type="formattedtext">
+				<p>Description: This is basically a hand-held video recorder, able to take video and audio recordings in a narrow or wide-field mode. When used passively, it simply records all that is seen or heard. When used actively by draining 2 EU from the attached energy source, it takes an extraordinarily detailed holographic full-range snapshot/image, which it can store and send to a computer for more detailed 3-dimensional analysis.</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Scanner</item_type>
+			<item_typevalue type="string">scanner</item_typevalue>
+			<name type="string">Audio/Visual Scanner (Copy)</name>
+			<passive type="string">video/audio recorder</passive>
+			<payload type="string">EU</payload>
+			<RadioList1 type="string">passive</RadioList1>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<usage type="string">2/ Active Scan</usage>
+			<weight type="number">0</weight>
+		</id-00007>
+		<id-00008>
+			<aoe_cb type="number">0</aoe_cb>
+			<cost type="string">100</cost>
+			<count type="number">1</count>
+			<cu_required type="number">0</cu_required>
+			<damage_alt_dr type="dice"></damage_alt_dr>
+			<damage_dr type="dice"></damage_dr>
+			<integrated_cb type="number">0</integrated_cb>
+			<item_description type="formattedtext">
+				<p>Description: These provide extra Body Points to protect the wearer from physical damage. They do not protect against beam, electric, or sonic damage, but will protect against the most common types of damage, such as from bullets, swords, and the claws of beasts. Once the suit is reduced to 0 BP, any additional damage applies to the character and the suit is trashed. A ballistic suit can be repaired by a technician with a techkit, but only if it has 1 or more BP left.</p>
+				<p>Civilian suits provide only 10 BP but are totally indistinguishable from normal clothes. Security suits provide 25 BP and appear as light body armor or paramilitary or security uniforms, though they can be concealed beneath long jackets or bulky clothes. Military suits offer 50 BP but cannot be hidden; it&#8217;s obvious the character is wearing body armor.</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Defense</item_type>
+			<item_typevalue type="string">defense</item_typevalue>
+			<name type="string">Ballistic Suit, Civilian (Copy)</name>
+			<protection type="string">10</protection>
+			<RadioList1 type="string">passive</RadioList1>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<weight type="number">0</weight>
+		</id-00008>
+		<id-00009>
+			<cost type="string">2</cost>
+			<count type="number">1</count>
+			<item_description type="formattedtext">
+				<p>Description: This is a waist-mounted durable case for holding 20 crossbow bolts firmly. Some even have spring-released bolts ejected by a button- push into the wielder&#8217;s hand for quick loading. Bolts can often be removed and reused from targets.</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Gear</item_type>
+			<item_typevalue type="string">gear</item_typevalue>
+			<name type="string">Bolt Case (Copy)</name>
+			<passive_active_radio type="string">passive</passive_active_radio>
+			<payload type="string">20 bolts</payload>
+			<RadioList1 type="string">passive</RadioList1>
+			<subtype type="string">ammunition</subtype>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<weight type="number">0</weight>
+		</id-00009>
+		<id-00010>
+			<bonus type="string">10km comm range</bonus>
+			<cost type="string">1000</cost>
+			<count type="number">1</count>
+			<item_description type="formattedtext">
+				<p>Description: This implant allows the character to communicate via radio frequencies with other communication devices, such as wristcoms. Modern-tech comm net implants allow 5 km range, high-tech implants allow 10 km range, and cutting-edge ones allow 10 km range and can connect to digital networks on populated worlds to operate just like a hands-free version of the traditional hand-held communicator.</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Implant</item_type>
+			<item_typevalue type="string">implant</item_typevalue>
+			<name type="string">Comm Net Implant, High-Tech (Copy)</name>
+			<power type="string">Bioelectric field</power>
+			<RadioList1 type="string">passive</RadioList1>
+			<weight type="number">0</weight>
+		</id-00010>
+		<id-00011>
+			<cost type="string">10</cost>
+			<count type="number">1</count>
+			<item_description type="formattedtext">
+				<p>Description: This is a suit of clothes any common individual might wear who engages in regular civilian activity. It&#8217;s inexpensive and isn&#8217;t going to win you any points for fashion, but it&#8217;s functional and acceptable.</p>
+				<p>This entry can also be used for common accessories not normally included in a common outfit, such as jackets, hats, or scarves.</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Gear</item_type>
+			<item_typevalue type="string">gear</item_typevalue>
+			<name type="string">Common Attire (Copy)</name>
+			<RadioList1 type="string">passive</RadioList1>
+			<weight type="number">0</weight>
+		</id-00011>
+		<id-00012>
+			<cost type="string">1500</cost>
+			<count type="number">1</count>
+			<item_description type="formattedtext">
+				<p>Description: This is a device about the size of a cigar box, worn on a belt or carried with a shoulder strap. It contains a dedicated computer with an artificial intelligence. It has an integrated audio/ visual and vocal scanner but can only use them passively. It has a PER and INT score of 50 and a normal violence interlock (as described in Chapter 7, Robots). A digital assistant accumulates memories and develops personalities to get along with those it assists, but that can be wiped when a new owner buys it. They can talk conversationally and answer questions and seem almost sapient, but are not. Nobody thinks they&#8217;re talking to a living being. A digital assistant is programmed with one skill at +0 and one other at -10 but cannot learn or improve further. Its programming can only contain skills from the following list: Academic, Explorer, Medic, Scientist, or Technician. This device is powered by an array of eight microbatteries that should last the life of the equipment.</p>
+				<p>A high-tech Digital Assistant costs 1,500&#169; and has scores of 60 for PER and INT. It has two skills at +0 and two at -10. Its speech is conversational and intuitive. A cutting-edge version also exists, which costs 3,000&#169; and has scores of 70 for PER and INT. It has one skill at +10, two skills at +0, and two at - 10. Its speech is indistinguishable from a living being.</p>
+				<p>Digital Assistants are often integrated into vehicles and starships in order to take the place of a crew member. In this case, it also has the Pilot at +0 and has access to any equipment integrated into its design.</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Gear</item_type>
+			<item_typevalue type="string">gear</item_typevalue>
+			<name type="string">Digital Assistant, High-Tech (Copy)</name>
+			<picture type="token">images/Digital Assistant.webp@FS Players Handbook</picture>
+			<RadioList1 type="string">passive</RadioList1>
+			<subtype type="string">tools</subtype>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<weight type="number">0</weight>
+		</id-00012>
+		<id-00013>
+			<cost type="string">100</cost>
+			<count type="number">1</count>
+			<damage type="string">Stuns Electronic Devices</damage>
+			<damagetype type="string">electric</damagetype>
+			<item_description type="formattedtext">
+				<p>Description: This small device can be hurled at a vehicle, robot, or individual. It sticks to the target magnetically and emits a powerful electro- magnetic pulse in a 6 m radius. All electronics in that radius might falter and fail. Modern electronics are robust and designed to recover. Consider the EMP grenade to create a stun effect targeting robots, vehicles, computers, and various hand-held or implanted technology. Treat all such objects as having a 50% STR for resistance check and recovery purposes. Characters should be warned about the large blast radius. It won&#8217;t help the player much if he disables all his own tech as well!</p>
+			</item_description>
+			<item_link type="windowreference">
+				<class>item</class>
+				<recordname />
+			</item_link>
+			<item_type type="string">Weapon</item_type>
+			<item_typevalue type="string">weapon</item_typevalue>
+			<name type="string">EMP Grenade (Copy)</name>
+			<RadioList1 type="string">passive</RadioList1>
+			<range type="string">10m</range>
+			<subtype type="string">explosive</subtype>
+			<suit_screen_radio type="string">suit</suit_screen_radio>
+			<training type="string">CRD+Marksman</training>
+			<weight type="number">0</weight>
+		</id-00013>
+	</item>

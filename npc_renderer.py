@@ -1,54 +1,66 @@
 import io
+import docx
 from docx.shared import Inches
-from docxtpl import DocxTemplate, InlineImage
+from docxtpl import DocxTemplate
+from PIL import Image as PILImage
 from fg_parser import clean_xml_text
 from word_renderer import write_formatted_text
 
+def create_image_subdoc(tpl, mod_zip, asset_path, target_width):
+    """
+    Creates an inline sub-document using explicit dimension calculations
+    to overcome the sub-document environment constraint, locking true aspect ratios.
+    """
+    if not asset_path:
+        return ""
+        
+    if "@" in asset_path:
+        return f"[ASSET SOURCED EXTERNALLY: {asset_path}]"
+
+    try:
+        with mod_zip.open(asset_path) as img_file:
+            img_data = img_file.read()
+            
+        with PILImage.open(io.BytesIO(img_data)) as img:
+            width_px, height_px = img.size
+            
+            # Calculate explicit aspect ratio parameters
+            aspect_ratio = height_px / width_px
+            target_height = target_width * aspect_ratio
+            
+            output_stream = io.BytesIO()
+            img.save(output_stream, format="PNG")
+            output_stream.seek(0)
+            
+        # Initialize a clean sub-document layout stream
+        subdoc = tpl.new_subdoc()
+        p = subdoc.add_paragraph()
+        p.alignment = 1  # Centered alignment anchor
+        
+        # FIX: Provide BOTH width and height explicitly to override subdoc square defaults
+        p.add_run().add_picture(output_stream, width=Inches(target_width), height=Inches(target_height))
+        return subdoc
+
+    except KeyError:
+        return f"[MISSING MODULE ASSET: {asset_path}]"
+    except Exception as e:
+        print(f"  [!] ASSET WARNING: Failed to process picture '{asset_path}'. Error: {e}")
+        return f"[CORRUPT ASSET: {asset_path}]"
+
 def process_npc_graphics(tpl, mod_zip, npc):
     """
-    Attaches images directly to the individual NPC data structure 
-    so they can be called via {{npc.picture}} inside the loop.
+    Converts image data channels into auto-scaling sub-documents 
+    instead of using docxtpl's rigid InlineImage parameters.
     """
     raw_node = npc["raw_node"]
     pic_path = raw_node.findtext("picture") or ""
     token_flat_path = raw_node.findtext("token") or ""
     token_cam_path = raw_node.findtext("token3Dflat") or ""
 
-    if pic_path:
-        if "@" in pic_path:
-            npc['picture'] = f"[IMAGE SOURCED EXTERNALLY: {pic_path}]"
-        else:
-            try:
-                with mod_zip.open(pic_path) as img_file:
-                    npc['picture'] = InlineImage(tpl, io.BytesIO(img_file.read()), width=Inches(3.5))
-            except KeyError:
-                npc['picture'] = f"[MISSING MODULE IMAGE: {pic_path}]"
-    else:
-        npc['picture'] = ""
-
-    if token_flat_path:
-        if "@" in token_flat_path:
-            npc['token_flat'] = f"[TOKEN SOURCED EXTERNALLY: {token_flat_path}]"
-        else:
-            try:
-                with mod_zip.open(token_flat_path) as img_file:
-                    npc['token_flat'] = InlineImage(tpl, io.BytesIO(img_file.read()), width=Inches(2.0))
-            except KeyError:
-                npc['token_flat'] = f"[MISSING MODULE TOKEN: {token_flat_path}]"
-    else:
-        npc['token_flat'] = ""
-
-    if token_cam_path:
-        if "@" in token_cam_path:
-            npc['token_camera'] = f"[3D TOKEN SOURCED EXTERNALLY: {token_cam_path}]"
-        else:
-            try:
-                with mod_zip.open(token_cam_path) as img_file:
-                    npc['token_camera'] = InlineImage(tpl, io.BytesIO(img_file.read()), width=Inches(2.0))
-            except KeyError:
-                npc['token_camera'] = f"[MISSING MODULE 3D TOKEN: {token_cam_path}]"
-    else:
-        npc['token_camera'] = ""
+    # Generate isolated layout anchors for each token slot with specific widths
+    npc['picture'] = create_image_subdoc(tpl, mod_zip, pic_path, target_width=3.5)
+    npc['token_flat'] = create_image_subdoc(tpl, mod_zip, token_flat_path, target_width=1.7)
+    npc['token_camera'] = create_image_subdoc(tpl, mod_zip, token_cam_path, target_width=1.7)
 
     return npc
 
@@ -62,7 +74,6 @@ def render_npc_appendix(mod_zip, structured_categories, doc_base, blueprint_path
     print(f"Injecting {len(structured_categories)} sorted category tracks into blueprints...")
     tpl = DocxTemplate(blueprint_path)
 
-    # Run through groups to pre-populate image formats and text boxes elements
     for group in structured_categories:
         for npc in group["npcs"]:
             npc = process_npc_graphics(tpl, mod_zip, npc)
@@ -75,7 +86,6 @@ def render_npc_appendix(mod_zip, structured_categories, doc_base, blueprint_path
             else:
                 npc["npc_notes"] = ""
 
-    # Simply hand the array list over to Jinja
     context = {
         "categories": structured_categories
     }
@@ -85,7 +95,10 @@ def render_npc_appendix(mod_zip, structured_categories, doc_base, blueprint_path
         doc_base.add_page_break()
         for element in tpl.element.body:
             doc_base.element.body.append(element)
-    except Exception as jinja_err:
-        print(f"\n[!] Category list single-pass layout parsing failed.")
-        print(f"    Error Details: {jinja_err}")
-        raise jinja_err
+    except Exception as render_err:
+        import traceback
+        print(f"\n[!] CRITICAL TEMPLATE RENDER FAILURE inside npc_renderer.py!")
+        print(f"--- TRACEBACK LOGS ---")
+        traceback.print_exc()
+        print(f"----------------------")
+        raise render_err
