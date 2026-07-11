@@ -43,7 +43,8 @@ def create_item_image_subdoc(tpl, mod_zip, asset_path, target_width=3.5):
         print(f"  [!] ITEM ASSET WARNING: Failed to process picture '{asset_path}'. Error: {e}")
         return f"[CORRUPT ASSET: {asset_path}]"
 
-def render_item_appendix(mod_zip, items_data, master_doc, template_path):
+# FIX: Added appendix_label="" as the 5th positional argument
+def render_item_appendix(mod_zip, items_data, master_doc, template_path, appendix_label=""):
     """
     Compiles item lists using docxtpl and appends the structural table rows 
     into the master document stream.
@@ -76,8 +77,10 @@ def render_item_appendix(mod_zip, items_data, master_doc, template_path):
         else:
             item["item_description"] = "No description cataloged."
 
+    # FIX: Added appendix_label to the context payload
     context = {
-        "items": items_data
+        "items": items_data,
+        "appendix_label": appendix_label
     }
 
     try:

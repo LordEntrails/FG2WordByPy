@@ -64,7 +64,7 @@ def process_npc_graphics(tpl, mod_zip, npc):
 
     return npc
 
-def render_npc_appendix(mod_zip, structured_categories, doc_base, blueprint_path):
+def render_npc_appendix(mod_zip, structured_categories, doc_base, blueprint_path, appendix_label=""):
     """
     Renders multi-tiered categorized NPC lists into your master document.
     """
@@ -86,8 +86,10 @@ def render_npc_appendix(mod_zip, structured_categories, doc_base, blueprint_path
             else:
                 npc["npc_notes"] = ""
 
+    # FIXED: Added the missing comma at the end of the first line below
     context = {
-        "categories": structured_categories
+        "categories": structured_categories,
+        "appendix_label": appendix_label  
     }
 
     try:

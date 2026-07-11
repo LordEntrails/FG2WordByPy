@@ -39,7 +39,7 @@ def create_vehicle_image_subdoc(tpl, mod_zip, asset_path, target_width):
         print(f"  [!] VEHICLE ASSET WARNING: Failed to process picture '{asset_path}'. Error: {e}")
         return f"[CORRUPT ASSET: {asset_path}]"
 
-def render_vehicle_appendix(mod_zip, vehicles_data, master_doc, template_path):
+def render_vehicle_appendix(mod_zip, vehicles_data, master_doc, template_path, appendix_label=""):
     """
     Compiles the parsed vehicle catalog array into the master document.
     """
@@ -77,7 +77,10 @@ def render_vehicle_appendix(mod_zip, vehicles_data, master_doc, template_path):
         else:
             vehicle["vehicle_notes"] = "No structural description logs archived."
 
-    context = {"vehicles": vehicles_data}
+    context = {
+        "vehicles": vehicles_data,
+        "appendix_label": appendix_label
+    }
 
     try:
         tpl.render(context)
