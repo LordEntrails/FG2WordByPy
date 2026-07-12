@@ -1,0 +1,22 @@
+	<quest>
+		<id-00002>
+			<description type="formattedtext">
+				<p>player descriptive text</p>
+				<h>Don't miss this!</h>
+				<table>
+					<tr>
+						<td colspan="2">a table</td>
+						<td>second colum</td>
+					</tr>
+				</table>
+			</description>
+			<gmnotes type="formattedtext">
+				<p>GM secret text</p>
+				<frame>gm chat</frame>
+				<list>
+					<li>GM bullets</li>
+				</list>
+			</gmnotes>
+			<name type="string">Find the McGuffin</name>
+		</id-00002>
+	</quest>

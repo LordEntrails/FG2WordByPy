@@ -1,0 +1,93 @@
+<tables>
+		<id-00001>
+			<description type="string">a bunch of text for a table description. This table can be rolled up with FG dice and stuff.</description>
+			<dice type="dice">d10</dice>
+			<hiderollresults type="number">0</hiderollresults>
+			<labelcol1 type="string">Success</labelcol1>
+			<labelcol2 type="string">Failure</labelcol2>
+			<mod type="number">2</mod>
+			<name type="string">Rollable Table custom die with mod and item</name>
+			<resultscols type="number">2</resultscols>
+			<table_positionoffset type="number">0</table_positionoffset>
+			<tablerows>
+				<id-00001>
+					<fromrange type="number">3</fromrange>
+					<results>
+						<id-00001>
+							<result type="string">Burrito</result>
+							<resultlink type="windowreference">
+								<class />
+								<recordname />
+							</resultlink>
+						</id-00001>
+						<id-00002>
+							<result type="string">Taquito</result>
+							<resultlink type="windowreference">
+								<class />
+								<recordname />
+							</resultlink>
+						</id-00002>
+					</results>
+					<torange type="number">6</torange>
+				</id-00001>
+				<id-00002>
+					<fromrange type="number">7</fromrange>
+					<results>
+						<id-00001>
+							<result type="string">[1d4] EMP Grenades</result>
+							<resultlink type="windowreference">
+								<class>item</class>
+								<recordname>item.id-00013</recordname>
+							</resultlink>
+						</id-00001>
+						<id-00002>
+							<result type="string">Nothing</result>
+							<resultlink type="windowreference">
+								<class />
+								<recordname />
+							</resultlink>
+						</id-00002>
+					</results>
+					<torange type="number">12</torange>
+				</id-00002>
+			</tablerows>
+		</id-00001>
+		<id-00002>
+			<description type="string">Defajult die based upon the table row values</description>
+			<dice type="dice"></dice>
+			<hiderollresults type="number">0</hiderollresults>
+			<labelcol1 type="string">Result</labelcol1>
+			<mod type="number">0</mod>
+			<name type="string">Simple Table</name>
+			<resultscols type="number">1</resultscols>
+			<table_positionoffset type="number">0</table_positionoffset>
+			<tablerows>
+				<id-00001>
+					<fromrange type="number">1</fromrange>
+					<results>
+						<id-00001>
+							<result type="string">First Row Result</result>
+							<resultlink type="windowreference">
+								<class />
+								<recordname />
+							</resultlink>
+						</id-00001>
+					</results>
+					<torange type="number">7</torange>
+				</id-00001>
+				<id-00002>
+					<fromrange type="number">8</fromrange>
+					<results>
+						<id-00001>
+							<result type="string">Much more common 8-20</result>
+							<resultlink type="windowreference">
+								<class />
+								<recordname />
+							</resultlink>
+						</id-00001>
+					</results>
+					<torange type="number">20</torange>
+				</id-00002>
+			</tablerows>
+		</id-00002>
+	</tables>

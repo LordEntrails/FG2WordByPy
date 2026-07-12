@@ -1,0 +1,56 @@
+<treasureparcels>
+		<id-00001>
+			<coinlist>
+				<id-00001>
+					<amount type="number">200</amount>
+					<description type="string">Credits</description>
+				</id-00001>
+			</coinlist>
+			<itemlist>
+				<id-00001>
+					<carried type="number">1</carried>
+					<cost type="string">100</cost>
+					<count type="number">4</count>
+					<damage type="string">Stuns Electronic Devices</damage>
+					<damagetype type="string">electric</damagetype>
+					<item_description type="formattedtext">
+						<p>Description: This small device can be hurled at a vehicle, robot, or individual. It sticks to the target magnetically and emits a powerful electro- magnetic pulse in a 6 m radius. All electronics in that radius might falter and fail. Modern electronics are robust and designed to recover. Consider the EMP grenade to create a stun effect targeting robots, vehicles, computers, and various hand-held or implanted technology. Treat all such objects as having a 50% STR for resistance check and recovery purposes. Characters should be warned about the large blast radius. It won&#8217;t help the player much if he disables all his own tech as well!</p>
+					</item_description>
+					<item_link type="windowreference">
+						<class>item</class>
+						<recordname />
+					</item_link>
+					<item_type type="string">Weapon</item_type>
+					<item_typevalue type="string">weapon</item_typevalue>
+					<name type="string">EMP Grenade (Copy)</name>
+					<RadioList1 type="string">passive</RadioList1>
+					<range type="string">10m</range>
+					<subtype type="string">explosive</subtype>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<training type="string">CRD+Marksman</training>
+					<weight type="number">0</weight>
+				</id-00001>
+				<id-00002>
+					<bonus type="string">10km comm range</bonus>
+					<carried type="number">1</carried>
+					<cost type="string">1000</cost>
+					<count type="number">1</count>
+					<item_description type="formattedtext">
+						<p>Description: This implant allows the character to communicate via radio frequencies with other communication devices, such as wristcoms. Modern-tech comm net implants allow 5 km range, high-tech implants allow 10 km range, and cutting-edge ones allow 10 km range and can connect to digital networks on populated worlds to operate just like a hands-free version of the traditional hand-held communicator.</p>
+					</item_description>
+					<item_link type="windowreference">
+						<class>item</class>
+						<recordname />
+					</item_link>
+					<item_type type="string">Implant</item_type>
+					<item_typevalue type="string">implant</item_typevalue>
+					<name type="string">Comm Net Implant, High-Tech (Copy)</name>
+					<power type="string">Bioelectric field</power>
+					<RadioList1 type="string">passive</RadioList1>
+					<weight type="number">0</weight>
+				</id-00002>
+			</itemlist>
+			<name type="string">A Typical Treasure Parcel</name>
+			<temp />
+		</id-00001>
+	</treasureparcels>

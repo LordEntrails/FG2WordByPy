@@ -1,0 +1,336 @@
+<starships>
+		<id-00001>
+			<atmo type="number">800</atmo>
+			<capacitors type="number">20</capacitors>
+			<capacitors_current type="number">0</capacitors_current>
+			<cargo type="number">25</cargo>
+			<cargo_current type="number">0</cargo_current>
+			<cargo_text type="formattedtext">
+				<p />
+			</cargo_text>
+			<computer type="number">50</computer>
+			<crew type="number">2</crew>
+			<crewlist type="formattedtext">
+				<p />
+			</crewlist>
+			<description type="formattedtext">
+				<p>The scout is a highly desirable and beloved starship for small groups of spacefaring adventurers looking to make their mark on the frontier. The ship has two officer cabins and four additional 2-bunk cabins. The cockpit serves as escape launch for those at crew stations. Two 2-man escape launches are located near the entrance to the cargo bay. This ship has a science lab and a small sick bay, and is typically comprised of a full complement of scientists, technicians, and explorers. Scouts aren&#8217;t designed for combat; they&#8217;re designed to turn the unknown into the known. However, their advanced scanners and light armament can sometimes make them useful on the battlefield for specific missions, and their rugged construction gives them staying power.</p>
+			</description>
+			<dockingspace type="number">250</dockingspace>
+			<frame type="string">Small, Exploration</frame>
+			<fuel type="number">20</fuel>
+			<fuel_current type="number">0</fuel_current>
+			<handling type="number">45</handling>
+			<hardpoints type="number">0</hardpoints>
+			<hardpoints_max type="number">4</hardpoints_max>
+			<hull_points type="number">70</hull_points>
+			<hull_points_current type="number">0</hull_points_current>
+			<integration type="number">2</integration>
+			<integration_max type="number">6</integration_max>
+			<inventory_filter_defense type="string">defense</inventory_filter_defense>
+			<inventory_filter_weapon type="string">weapon</inventory_filter_weapon>
+			<inventorylist>
+				<id-00010>
+					<carried type="number">1</carried>
+					<cost type="string">2500</cost>
+					<count type="number">1</count>
+					<item_description type="formattedtext">
+						<p>Comms: Text</p>
+						<p>Description: These highly specialized devices are quite bulky. It takes two people to haul one around, so it generally remains in a shuttle, starship, building, or capital ship rather than being toted about. Aligning a subspace radio requires a Scientist-based action check and takes an hour. Once aligned, it can send subspace messages to a recipient on one selected world or a stationary starship whose coordinates are known. The message sent by a subspace radio is text only. It cannot contain complexities of sound or video. The device connects to an energy source and drains 2 EU to launch the message at its target. The message then travels at a rate of 1 LY/hour until it reaches its destination. Return messages take just as long, of course, but drain energy only from the sender, not the receiver. Many decades and much money has been spent trying to master subspace technology to allow the transport of solid matter at this speed, but so far only comms signals have been able to be sent with precision and reliability. Subspace radios use an antiquated technology once used for faster-than- light travel.</p>
+					</item_description>
+					<item_link type="windowreference">
+						<class>item</class>
+						<recordname />
+					</item_link>
+					<item_type type="string">Gear</item_type>
+					<item_typevalue type="string">gear</item_typevalue>
+					<location type="string">Integrated</location>
+					<name type="string">Subspace Radio</name>
+					<payload type="string">EU</payload>
+					<RadioList1 type="string">passive</RadioList1>
+					<range type="string">1 LY/Hr</range>
+					<subtype type="string">communication</subtype>
+					<usage type="string">2 EU/msg</usage>
+					<weight type="number">0</weight>
+				</id-00010>
+				<id-00011>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<cost type="string">25000</cost>
+					<count type="number">1</count>
+					<cu_required type="number">0</cu_required>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice"></damage_dr>
+					<integrated_cb type="number">0</integrated_cb>
+					<item_description type="formattedtext">
+						<p>A reflec screen works just like a character-scale screen to protect a ship against energy damage. Captains often order the raising of their reflec screens when near a large star or other source of radiation and heat. Otherwise it works identically to a ballistic screen, described in detail above.</p>
+					</item_description>
+					<item_type type="string">Defense</item_type>
+					<item_typevalue type="string">defense</item_typevalue>
+					<location type="string">Hardpoint</location>
+					<name type="string">SS Reflec Screen, Civilian</name>
+					<protection type="string">1 HP(B) / 2 Cap</protection>
+					<protectionType type="string">beam</protectionType>
+					<suit_screen_radio type="string">screen</suit_screen_radio>
+					<weight type="number">0</weight>
+				</id-00011>
+				<id-00012>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<cost type="string">10000</cost>
+					<count type="number">1</count>
+					<cu_required type="number">0</cu_required>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice"></damage_dr>
+					<integrated_cb type="number">0</integrated_cb>
+					<item_description type="formattedtext">
+						<p>A ballistic screen works just like a character-scale screen except that it drains a starship&#8217;s capacitors rather than a traditional EU source. It only protects the ship against physical damage and is installed on every ship in the frontier. When travelling through nebulae, asteroid fields, dust clouds, and other region full of hard-to-find particulates, most starship captains will order their ballistic shield raised. When used outside of combat, it drains capacitors at a rate below their rate of recharge and therefore can operate nearly indefinitely. Ballistic screens come in three grades. Civilian grade screens drain 2 capacitors for each 1 hull point of damage they absorb. Security grade screens drain 1 capacitor per hull point, and military grade screens drain only 1 capacitor for every 2 hull points of damage absorbed. If a ballistic screen is still active after taking ballistic damage, no rolls on the specific starship damage table can be made by any ballistic attack. Note that no screen can be raised while moving at Nova Drive speeds.</p>
+					</item_description>
+					<item_type type="string">Defense</item_type>
+					<item_typevalue type="string">defense</item_typevalue>
+					<location type="string">Hardpoint</location>
+					<name type="string">SS Ballistic Screen, Civilian</name>
+					<protection type="string">1 HP/ 2 Cap</protection>
+					<protectionType type="string">hp</protectionType>
+					<suit_screen_radio type="string">screen</suit_screen_radio>
+					<weight type="number">0</weight>
+				</id-00012>
+				<id-00013>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<cost type="string">60000</cost>
+					<count type="number">1</count>
+					<cu_required type="number">0</cu_required>
+					<damage type="string">1-5D(B)</damage>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice">d10</damage_dr>
+					<damagetype type="string">beam</damagetype>
+					<integrated_cb type="number">0</integrated_cb>
+					<item_description type="formattedtext">
+						<p>This weapon is popular among long haulers for its damage versatility. It fires an intense green beam of deadly energy which can be dialed between 1 and 5. The setting determines how many capacitors are drained and how much damage it will cause, between 1- 5D(B). The width of the beam describes its lethality.</p>
+					</item_description>
+					<item_type type="string">Weapon</item_type>
+					<item_typevalue type="string">weapon</item_typevalue>
+					<location type="string">Hardpoint</location>
+					<name type="string">Laser Battery</name>
+					<payload type="string">Capacitor</payload>
+					<range type="string">8</range>
+					<subtype type="string">heavy</subtype>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<usage type="string">1-5</usage>
+					<weight type="number">0</weight>
+				</id-00013>
+				<id-00014>
+					<ammo type="string">10</ammo>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<cost type="string">20000</cost>
+					<count type="number">1</count>
+					<cu_required type="number">0</cu_required>
+					<damage type="string">3D</damage>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice">3d10</damage_dr>
+					<damagetype type="string">hullpoints</damagetype>
+					<integrated_cb type="number">0</integrated_cb>
+					<item_description type="formattedtext">
+						<p>Comprised of several self- propelled mini rockets, this weapon causes less damage than its cousin (the assault rocket), but the range is greatly increased. As the battery fires, several missiles take off at different vectors attempting to fool defensive systems. Each time it hits a target, the weapon causes 3D damage. It has a payload of 10 rocket clusters.</p>
+					</item_description>
+					<item_type type="string">Weapon</item_type>
+					<item_typevalue type="string">weapon</item_typevalue>
+					<location type="string">Hardpoint</location>
+					<name type="string">Rocket Battery</name>
+					<payload type="string">shot</payload>
+					<range type="string">6</range>
+					<subtype type="string">heavy</subtype>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<usage type="string">1</usage>
+					<weight type="number">0</weight>
+				</id-00014>
+				<id-00015>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<count type="number">1</count>
+					<cu_required type="number">0</cu_required>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice"></damage_dr>
+					<integrated_cb type="number">1</integrated_cb>
+					<item_description type="formattedtext">
+						<p>This adds a retractable grappling system that launches magnetic grapples with reinforced cables to grab other ships or objects in space. It&#8217;s a very low-tech and simple system. If a ship grapples a larger ship, it&#8217;s along for the ride. Otherwise, the grappling vessel can pull the smaller vessel along with it, towing it or controlling where it goes. Pilot action contests are sometimes needed in case the grappled vessel&#8217;s pilot doesn&#8217;t want to be grappled. Grapple clamps consume 1 CU of cargo space and cost 500&#169;. Some ship designers have spares kept in the cargo hold because grapple clamps can sometimes break from excessive stress use. Grapple clamps come in only one size, and are interchangeable from one ship type to another. They are easily replaced with a few hours of work.</p>
+					</item_description>
+					<item_type type="string">Vehicle</item_type>
+					<location type="string">Integrated</location>
+					<name type="string">Grapple Clamps</name>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<veh_subtype type="string">equipment</veh_subtype>
+					<weight type="number">0</weight>
+				</id-00015>
+				<id-00016>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<cost type="string">25000</cost>
+					<count type="number">2</count>
+					<cu_required type="number">10</cu_required>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice"></damage_dr>
+					<integrated_cb type="number">1</integrated_cb>
+					<item_description type="formattedtext">
+						<p>This provides all the tools and materials for a scientist to run experiments, perform classifications and research, analyze samples in incredible depth, etc. A science lab gives a scientist ample room to work and takes up CU aboard a ship, displacing a full 10 CU for each scientist given room to work (at a cost of 25,000&#169; per scientist). A scientist performing research, analysis, or experiments without a lab might be penalized in his action checks. Regardless of the size of the science lab or how many scientists it may simultaneously support, it is considered only one integrated item.</p>
+					</item_description>
+					<item_type type="string">Vehicle</item_type>
+					<location type="string">Integrated</location>
+					<name type="string">Science Lab</name>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<veh_subtype type="string">equipment</veh_subtype>
+					<weight type="number">0</weight>
+				</id-00016>
+				<id-00017>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<cost type="string">2500</cost>
+					<count type="number">1</count>
+					<cu_required type="number">3</cu_required>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice"></damage_dr>
+					<integrated_cb type="number">1</integrated_cb>
+					<item_description type="formattedtext">
+						<p>This provides all the tools and diagnostic equipment required to perform all the needs of a fully staffed hospital. You may treat this as a medical facility for helping wounded characters that can no longer be helped in the field. You must specify the amount of cargo bay space you&#8217;re consuming with a sick bay, so that you may work on more patients. Each 3 CU (and 2,500&#169;) used up in this manner allows for the care of one patient. Regardless of the size of the sick bay, it is only considered one integrated item. One doctor can take care of several patients. A medic need not use his own medkit when using a sick bay to treat or diagnose patients.</p>
+					</item_description>
+					<item_type type="string">Vehicle</item_type>
+					<location type="string">Integrated</location>
+					<name type="string">Sick Bay</name>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<veh_subtype type="string">equipment</veh_subtype>
+					<weight type="number">0</weight>
+				</id-00017>
+				<id-00018>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<count type="number">1</count>
+					<cu_required type="number">0</cu_required>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice"></damage_dr>
+					<integrated_cb type="number">0</integrated_cb>
+					<item_description type="formattedtext">
+						<p>Transponder signal that broadcasts the ship&#8217;s registration identity and ownership to any ship which scans for it. It&#8217;s illegal to modify/hack the transponder to provide false (or no) identity, but pirates and other criminals tend to do it anyway. It&#8217;s about as difficult to hack/modify as a violence interlock for robots, and punishment varies dramatically depending on which authority catches you!</p>
+					</item_description>
+					<item_type type="string">Vehicle</item_type>
+					<name type="string">Transponder</name>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<veh_subtype type="string">equipment</veh_subtype>
+					<weight type="number">0</weight>
+				</id-00018>
+				<id-00019>
+					<aoe_cb type="number">0</aoe_cb>
+					<carried type="number">1</carried>
+					<count type="number">1</count>
+					<cu_required type="number">0</cu_required>
+					<damage_alt_dr type="dice"></damage_alt_dr>
+					<damage_dr type="dice"></damage_dr>
+					<integrated_cb type="number">1</integrated_cb>
+					<item_description type="formattedtext">
+						<p>A starship A.I. is treated similar to a Digital Assistant, though it automatically has the Pilot skill with a score of +0 in addition to other skill choices normally available to a Digital Assistant. It can use this skill with its INT score to pilot the ship, counting as 1 crew member towards the ship&#8217;s crew requirement. The A.I. may use all equipment integrated into the starship, though without removing its violence interlock it may not engage in activities it believes will kill living beings. Players who want more advanced A.I. in their starship can purchase the equivalent of high-tech or cutting- edge Digital Assistants (refer to Chapter 5, Equipment &#38; Technology). A starship A.I. counts as one integration space, but the CU and cost varies according to the integrated tech table.</p>
+					</item_description>
+					<item_type type="string">Vehicle</item_type>
+					<name type="string">Artificial Intelligence</name>
+					<suit_screen_radio type="string">suit</suit_screen_radio>
+					<veh_subtype type="string">equipment</veh_subtype>
+					<weight type="number">0</weight>
+				</id-00019>
+			</inventorylist>
+			<name type="string">Scout (Copy)</name>
+			<notes type="formattedtext">
+				<h>Artificial Intelligence:</h>
+				<p>PER 50, INT 50, Normal violence interlock. Pilot +0, Scientist (physical) +0, Technician (starship) -10</p>
+			</notes>
+			<nova type="number">1</nova>
+			<passengers type="number">8</passengers>
+			<picture type="token">images/Scout.webp@FS Players Handbook</picture>
+			<powercore type="string">Type-I Reactor</powercore>
+			<provisions type="number">200</provisions>
+			<provisions_current type="number">0</provisions_current>
+			<pulse type="number">6</pulse>
+			<recharge type="number">1</recharge>
+			<scanners type="number">75</scanners>
+			<scoops type="number">1</scoops>
+			<structure type="number">55</structure>
+			<subsystem type="number">14</subsystem>
+			<targeting type="number">50</targeting>
+			<temp />
+			<token type="token">tokens/Scout.webp@FS Players Handbook</token>
+			<token3Dflat type="token"></token3Dflat>
+		</id-00001>
+		<category name="Little Ships">
+			<id-00002>
+				<atmo type="number">0</atmo>
+				<capacitors type="number">2</capacitors>
+				<capacitors_current type="number">0</capacitors_current>
+				<cargo type="number">1</cargo>
+				<cargo_current type="number">0</cargo_current>
+				<cargo_text type="formattedtext">
+					<p />
+				</cargo_text>
+				<computer type="number">10</computer>
+				<crew type="number">1</crew>
+				<description type="formattedtext">
+					<p>This four-armed spherical space vehicle is designed to perform external repairs on a ship or other space structure. It can also operate in an atmosphere, but only if released there. When it does so, it is only considered a two-armed device since it must use two of its &#8220;arms&#8221; as legs.</p>
+					<p>The design contains sufficient oxygen for up to 20 hours of continuous work before it must re-dock and renew its supply.</p>
+					<p>A workpod cannot be upgraded or have weapons or defenses installed, though Referees may arbitrate different model workpods with different features on various starship designs.</p>
+				</description>
+				<dockingspace type="number">5</dockingspace>
+				<frame type="string">Workpod</frame>
+				<fuel type="number">0</fuel>
+				<fuel_current type="number">0</fuel_current>
+				<handling type="number">60</handling>
+				<hardpoints type="number">0</hardpoints>
+				<hardpoints_max type="number">0</hardpoints_max>
+				<hull_points type="number">2</hull_points>
+				<hull_points_current type="number">0</hull_points_current>
+				<integration type="number">0</integration>
+				<integration_max type="number">0</integration_max>
+				<inventorylist>
+					<id-00001>
+						<carried type="number">1</carried>
+						<cost type="string">100</cost>
+						<count type="number">1</count>
+						<item_description type="formattedtext">
+							<p>Comms: Audio, video, text, holographic</p>
+							<p>Description: This is by far the most popular communication device in the known galaxy. There are many brands, and some have features others do not. A communicator is a hand-held device consisting mostly of a durable touch screen. Its range is 10 km when using radio frequency (RF) signals, or virtually unlimited when connected to a digital satellite network common to civilized regions. Communicators can be encrypted for private conversations and can include audio, visual, holographic, and text components. Various entertainment applications can be downloaded while on digital networks for a low cost. Communicators are powered by microbatteries, which generally last the lifetime of the equipment.</p>
+						</item_description>
+						<item_link type="windowreference">
+							<class>item</class>
+							<recordname />
+						</item_link>
+						<item_type type="string">Gear</item_type>
+						<item_typevalue type="string">gear</item_typevalue>
+						<name type="string">Communicator</name>
+						<picture type="token">images/Communicator.webp@FS Players Handbook</picture>
+						<RadioList1 type="string">passive</RadioList1>
+						<range type="string">10km</range>
+						<subtype type="string">communication</subtype>
+						<suit_screen_radio type="string">suit</suit_screen_radio>
+						<weight type="number">0</weight>
+					</id-00001>
+				</inventorylist>
+				<name type="string">Workpod (Copy)</name>
+				<notes type="formattedtext">
+					<p />
+				</notes>
+				<nova type="number">0</nova>
+				<passengers type="number">0</passengers>
+				<picture type="token">images/Workpod.webp@FS Players Handbook</picture>
+				<powercore type="string">[Type-V Parabatteries] </powercore>
+				<provisions type="number">20</provisions>
+				<provisions_current type="number">0</provisions_current>
+				<pulse type="number">0.5</pulse>
+				<recharge type="number">1</recharge>
+				<scanners type="number">25</scanners>
+				<scoops type="number">0</scoops>
+				<structure type="number">40</structure>
+				<subsystem type="number">1</subsystem>
+				<targeting type="number">30</targeting>
+				<temp />
+				<token type="token">tokens/Workpod.webp@FS Players Handbook</token>
+				<token3Dflat type="token"></token3Dflat>
+			</id-00002>
+		</category>
+	</starships>

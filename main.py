@@ -90,6 +90,7 @@ def main():
         processed_npcs = []
         processed_items = []
         processed_vehicles = []
+        processed_starships = []
         processed_locations = []
 
         pipeline_order = [
@@ -97,6 +98,7 @@ def main():
             {"id": "npc",        "is_appendix": True},
             {"id": "item",       "is_appendix": True},
             {"id": "vehicle",    "is_appendix": True},
+            {"id": "starships",  "is_appendix": True},
             {"id": "location",   "is_appendix": True}
         ]
 
@@ -171,6 +173,28 @@ def main():
                     vehicle_renderer.render_vehicle_appendix(mod_zip, vehicles_data, doc, vehicle_template, current_appendix)
                     if step["is_appendix"]: appendix_ptr += 1
 
+            # --- ADDED: STEP 3 FIXED INTEGRATION ---
+            elif component == "starships":
+                import fs_starships_parser
+                starships_data = fs_starships_parser.get_starships_catalog(db_root)
+                if starships_data:
+                    import starships_renderer
+                    for group in starships_data:
+                        for ship in group["starships"]:
+                            processed_starships.append((ship["name"], f"REF_STARSHIP_{ship['raw_node'].tag}"))
+                               
+                    ship_template = rf.get_template_path("starships")
+                    starships_renderer.render_starships_appendix(
+                        mod_zip=mod_zip,
+                        structured_categories=starships_data,
+                        doc_base=doc,
+                        blueprint_path=ship_template,
+                        appendix_label=current_appendix
+                    )
+                    if step["is_appendix"]: appendix_ptr += 1
+                else:
+                    print(f"[INFO] Empty Component Detected: Skipping {component.upper()} appendix block layout.")
+
             elif component == "location":
                 location_data = rf.execute_parser("location", db_root)
                 if location_data:
@@ -193,7 +217,7 @@ def main():
         # =====================================================================
         print("\nResolving cross-reference anchors safely...")
         b_id = 2000
-        all_targets = processed_npcs + processed_items + processed_vehicles + processed_locations
+        all_targets = processed_npcs + processed_items + processed_vehicles + processed_starships + processed_locations
         
         for paragraph in doc.paragraphs:
             text_line = paragraph.text.strip()

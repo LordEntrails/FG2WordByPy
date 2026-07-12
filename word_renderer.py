@@ -101,7 +101,7 @@ def embed_encounter_table(doc, record_name, xml_root):
     """
     Finds a <battle> record inside db.xml, extracts its combatant list,
     and writes a concise encounter table directly inline with live links.
-    Locks explicit column widths to prevent page formatting distortion.
+    Locks explicit column widths to fit a 3.5" layout.
     """
     if xml_root is None or not record_name:
         return False
@@ -114,7 +114,6 @@ def embed_encounter_table(doc, record_name, xml_root):
 
     battle_name = clean_xml_text(battle_node.find("name")) or "Unnamed Skirmish"
     
-    # Styled block header for our embedded encounter
     p_title = doc.add_paragraph()
     p_title.paragraph_format.space_before = Inches(0.15)
     p_title.paragraph_format.space_after = Inches(0.05)
@@ -126,7 +125,6 @@ def embed_encounter_table(doc, record_name, xml_root):
         p.add_run("   (No combatants cataloged in this encounter structure)").italic = True
         return True
 
-    # Construct the concise table structure
     table = doc.add_table(rows=1, cols=2)
     table.style = 'Grid Table 4 Accent 1'
     table.header_row = True
@@ -135,11 +133,10 @@ def embed_encounter_table(doc, record_name, xml_root):
     table.last_column = False
     table.column_banding = False
     
-    # Explicit Column Width Layout Locks
-    QTY_WIDTH = Inches(0.75)
-    DESC_WIDTH = Inches(2.75)
+    # Precise Cell Layout Locks optimized for 3.5" total width
+    QTY_WIDTH = Inches(0.65)
+    DESC_WIDTH = Inches(2.85)
     
-    # Format Headers
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Qty"
     hdr_cells[1].text = "Combatant Designation"
@@ -153,12 +150,10 @@ def embed_encounter_table(doc, record_name, xml_root):
             for run in p.runs:
                 run.bold = True
 
-    # Pull each combatant out of the manifest list
     for child in npclist.findall('*'):
         count = clean_xml_text(child.find("count")) or "1"
         npc_name = clean_xml_text(child.find("name")) or "Unknown Combatant"
         
-        # Pull reference link to establish internal appendix anchor mapping
         npc_link_node = child.find("link")
         bookmark_anchor = ""
         if npc_link_node is not None:
@@ -180,7 +175,109 @@ def embed_encounter_table(doc, record_name, xml_root):
         else:
             p_name.add_run(npc_name)
             
-    # Add spacing paragraph below the table to clear formatting
+    p_spacer = doc.add_paragraph()
+    p_spacer.paragraph_format.space_after = Inches(0.1)
+    return True
+
+def embed_parcel_table(doc, record_name, xml_root):
+    """
+    Finds a <treasureparcels> record inside db.xml, extracts its currencies 
+    and items, and writes a concise parcel inventory table directly inline.
+    Locks explicit widths to fit a 3.5" two-column layout.
+    """
+    if xml_root is None or not record_name:
+        return False
+        
+    node_id = record_name.split('.')[-1] if '.' in record_name else record_name
+    parcel_node = xml_root.find(f"./treasureparcels/{node_id}")
+    
+    if parcel_node is None:
+        return False
+
+    parcel_name = clean_xml_text(parcel_node.find("name")) or "Unnamed Inventory Cache"
+    
+    p_title = doc.add_paragraph()
+    p_title.paragraph_format.space_before = Inches(0.15)
+    p_title.paragraph_format.space_after = Inches(0.05)
+    p_title.add_run(f"📦 Inventory Cache: {parcel_name}").bold = True
+    
+    coinlist = parcel_node.find("coinlist")
+    itemlist = parcel_node.find("itemlist")
+    
+    has_coins = coinlist is not None and list(coinlist)
+    has_items = itemlist is not None and list(itemlist)
+    
+    if not has_coins and not has_items:
+        p = doc.add_paragraph()
+        p.add_run("   (This cache contains no items or currency entries)").italic = True
+        return True
+
+    table = doc.add_table(rows=1, cols=2)
+    table.style = 'Grid Table 4 Accent 1'
+    table.header_row = True
+    table.row_banding = True
+    table.first_column = False
+    table.last_column = False
+    table.column_banding = False
+    
+    # Precise Cell Layout Locks tailored for 3.5" total layout spacing
+    QTY_WIDTH = Inches(0.65)
+    DESC_WIDTH = Inches(2.85)
+    
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = "Qty"
+    hdr_cells[1].text = "Item Description / Currency Type"
+    hdr_cells[0].width = QTY_WIDTH
+    hdr_cells[1].width = DESC_WIDTH
+    
+    for cell in hdr_cells:
+        for p in cell.paragraphs:
+            p.style = get_safe_style(doc, 'Normal')
+            for run in p.runs:
+                run.bold = True
+
+    # 1. Inject Currency Entries
+    if has_coins:
+        for coin in coinlist.findall('*'):
+            amount = clean_xml_text(coin.find("amount")) or "0"
+            denom = clean_xml_text(coin.find("description")) or "Credits"
+            
+            row_cells = table.add_row().cells
+            row_cells[0].width = QTY_WIDTH
+            row_cells[1].width = DESC_WIDTH
+            
+            row_cells[0].text = amount
+            p_desc = row_cells[1].paragraphs[0]
+            p_desc.style = get_safe_style(doc, 'Normal')
+            p_desc.add_run(denom).italic = True
+
+    # 2. Inject Equipment Item Entries
+    if has_items:
+        for item in itemlist.findall('*'):
+            count = clean_xml_text(item.find("count")) or "1"
+            item_name = clean_xml_text(item.find("name")) or "Unknown Item"
+            
+            bookmark_anchor = ""
+            item_link_node = item.find("item_link") or item.find("link")
+            if item_link_node is not None:
+                rec_ref = item_link_node.get("recordname") or item_link_node.text or ""
+                if "item.id-" in rec_ref:
+                    target_id = rec_ref.split('.')[-1]
+                    bookmark_anchor = f"REF_ITEM_{target_id}"
+
+            row_cells = table.add_row().cells
+            row_cells[0].width = QTY_WIDTH
+            row_cells[1].width = DESC_WIDTH
+            
+            row_cells[0].text = f"{count}x"
+            p_desc = row_cells[1].paragraphs[0]
+            p_desc.style = get_safe_style(doc, 'Normal')
+            
+            if bookmark_anchor:
+                insert_internal_hyperlink(p_desc, item_name, bookmark_anchor)
+            else:
+                p_desc.add_run(item_name)
+                
     p_spacer = doc.add_paragraph()
     p_spacer.paragraph_format.space_after = Inches(0.1)
     return True
@@ -223,13 +320,18 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                 record_name = link.get("recordname") or link.text or ""
                 link_text = clean_xml_text(link)
                 
-                # INTERCEPT: If it's an encounter link, extract data and draw the inline roster table
+                # Intercept combat encounter logs
                 if link_class == "battle":
                     success = embed_encounter_table(doc, record_name, xml_root)
                     if success:
-                        continue # Skip drawing standard bullet links for battles
+                        continue
+                        
+                # Intercept currency and item caches
+                if link_class == "treasureparcel":
+                    success = embed_parcel_table(doc, record_name, xml_root)
+                    if success:
+                        continue
                 
-                # FALLBACK/OTHER LINKS: Build future-proof dynamic appendix hyperlinks
                 style = get_safe_style(doc, 'Internal Link', 'Normal')
                 p = doc.add_paragraph(style=style)
                 p.add_run("o\t")
@@ -241,6 +343,8 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                     bookmark_name = f"REF_ITEM_{record_name.split('.')[-1]}"
                 elif "vehicle.id-" in record_name:
                     bookmark_name = f"REF_VEHICLE_{record_name.split('.')[-1]}"
+                elif "location.id-" in record_name:
+                    bookmark_name = f"REF_LOCATION_{record_name.split('.')[-1]}"
                 
                 if bookmark_name:
                     insert_internal_hyperlink(p, link_text, bookmark_name)
@@ -272,5 +376,5 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                         for paragraph in word_cell.paragraphs:
                             paragraph.style = get_safe_style(doc, 'Normal')
                             if r_idx == 0:
-                                        for run in paragraph.runs:
-                                            run.bold = True
+                                for run in paragraph.runs:
+                                    run.bold = True
