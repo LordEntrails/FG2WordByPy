@@ -22,14 +22,13 @@ def apply_inline_styles(node, paragraph_obj):
     if node is None:
         return
 
-    # Clean text before any child tags (removes raw code indents/newlines)
+    # FIXED: Pass 'cleaned_text' into add_run instead of the raw, uncleaned text string
     if node.text:
         cleaned_text = node.text.lstrip('\n\t').rstrip('\n\t')
         if cleaned_text or node.text == " ":  # Keep intentional spaces
-            paragraph_obj.add_run(node.text)
+            paragraph_obj.add_run(cleaned_text)
     
     for child in node:
-        # Secure the text child data and strip any raw layout indentation
         child_text = child.text if child.text else ""
         cleaned_child_text = child_text.lstrip('\n\t').rstrip('\n\t')
         
@@ -42,14 +41,12 @@ def apply_inline_styles(node, paragraph_obj):
         else:
             run = paragraph_obj.add_run(cleaned_child_text)
             
-        # Recurse if there are nested inline tags
         apply_inline_styles(child, paragraph_obj)
         
-        # Clean text trailing immediately after a child tag closure
         if child.tail:
             cleaned_tail = child.tail.lstrip('\n\t').rstrip('\n\t')
             if cleaned_tail or child.tail == " ":
-                paragraph_obj.add_run(child.tail)
+                paragraph_obj.add_run(cleaned_tail)
 
 def extract_and_insert_image(mod_zip, image_path, doc):
     try:
@@ -60,8 +57,7 @@ def extract_and_insert_image(mod_zip, image_path, doc):
             img.save(output_stream, format="PNG")
             output_stream.seek(0)
             p_img = doc.add_paragraph()
-            p_img.alignment = 1 # Centers the image frame alignment anchor
-            # FIXED SIZE SCALE: Set to exactly 3.5 inches to fit two-columns
+            p_img.alignment = 1 
             p_img.add_run().add_picture(output_stream, width=Inches(3.5))
             return True
     except KeyError:
@@ -71,15 +67,20 @@ def extract_and_insert_image(mod_zip, image_path, doc):
 
 def insert_internal_hyperlink(paragraph, text, bookmark_name):
     """
-    Inserts a native Microsoft Word cross-reference hyperlink to an internal bookmark.
+    Inserts a native Microsoft Word cross-reference hyperlink into a paragraph's
+    run collection without corrupting underlying table cell element structures.
     """
+    # 1. Create a clean run to hold the text context
+    run = paragraph.add_run()
+    
+    # 2. Build the OpenXML Hyperlink element structures safely
     hyperlink = oxml.shared.OxmlElement('w:hyperlink')
     hyperlink.set(ns.qn('w:anchor'), bookmark_name)
     
     new_run = oxml.shared.OxmlElement('w:r')
     rPr = oxml.shared.OxmlElement('w:rPr')
     
-    # Standard blue underline hyperlink text formatting look
+    # Style styling parameters cleanly
     color = oxml.shared.OxmlElement('w:color')
     color.set(ns.qn('w:val'), '0000FF')
     rPr.append(color)
@@ -94,15 +95,11 @@ def insert_internal_hyperlink(paragraph, text, bookmark_name):
     new_run.append(text_node)
     hyperlink.append(new_run)
     
-    paragraph._p.append(hyperlink)
+    # 3. Secure insertion pass: Inject the node relative to the container run frame
+    run._r.getparent().insert(run._r.getparent().index(run._r), hyperlink)
     return hyperlink
 
 def embed_encounter_table(doc, record_name, xml_root):
-    """
-    Finds a <battle> record inside db.xml, extracts its combatant list,
-    and writes a concise encounter table directly inline with live links.
-    Locks explicit column widths to fit a 3.5" layout.
-    """
     if xml_root is None or not record_name:
         return False
         
@@ -133,14 +130,12 @@ def embed_encounter_table(doc, record_name, xml_root):
     table.last_column = False
     table.column_banding = False
     
-    # Precise Cell Layout Locks optimized for 3.5" total width
     QTY_WIDTH = Inches(0.65)
     DESC_WIDTH = Inches(2.85)
     
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Qty"
     hdr_cells[1].text = "Combatant Designation"
-    
     hdr_cells[0].width = QTY_WIDTH
     hdr_cells[1].width = DESC_WIDTH
     
@@ -165,7 +160,6 @@ def embed_encounter_table(doc, record_name, xml_root):
         row_cells = table.add_row().cells
         row_cells[0].width = QTY_WIDTH
         row_cells[1].width = DESC_WIDTH
-        
         row_cells[0].text = f"{count}x"
         
         p_name = row_cells[1].paragraphs[0]
@@ -180,11 +174,6 @@ def embed_encounter_table(doc, record_name, xml_root):
     return True
 
 def embed_parcel_table(doc, record_name, xml_root):
-    """
-    Finds a <treasureparcels> record inside db.xml, extracts its currencies 
-    and items, and writes a concise parcel inventory table directly inline.
-    Locks explicit widths to fit a 3.5" two-column layout.
-    """
     if xml_root is None or not record_name:
         return False
         
@@ -220,7 +209,6 @@ def embed_parcel_table(doc, record_name, xml_root):
     table.last_column = False
     table.column_banding = False
     
-    # Precise Cell Layout Locks tailored for 3.5" total layout spacing
     QTY_WIDTH = Inches(0.65)
     DESC_WIDTH = Inches(2.85)
     
@@ -236,7 +224,6 @@ def embed_parcel_table(doc, record_name, xml_root):
             for run in p.runs:
                 run.bold = True
 
-    # 1. Inject Currency Entries
     if has_coins:
         for coin in coinlist.findall('*'):
             amount = clean_xml_text(coin.find("amount")) or "0"
@@ -245,13 +232,12 @@ def embed_parcel_table(doc, record_name, xml_root):
             row_cells = table.add_row().cells
             row_cells[0].width = QTY_WIDTH
             row_cells[1].width = DESC_WIDTH
-            
             row_cells[0].text = amount
+            
             p_desc = row_cells[1].paragraphs[0]
             p_desc.style = get_safe_style(doc, 'Normal')
             p_desc.add_run(denom).italic = True
 
-    # 2. Inject Equipment Item Entries
     if has_items:
         for item in itemlist.findall('*'):
             count = clean_xml_text(item.find("count")) or "1"
@@ -268,8 +254,8 @@ def embed_parcel_table(doc, record_name, xml_root):
             row_cells = table.add_row().cells
             row_cells[0].width = QTY_WIDTH
             row_cells[1].width = DESC_WIDTH
-            
             row_cells[0].text = f"{count}x"
+            
             p_desc = row_cells[1].paragraphs[0]
             p_desc.style = get_safe_style(doc, 'Normal')
             
@@ -290,13 +276,9 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
             if block_type == 'frame' or xml_node.tag == 'frame':
                 style = get_safe_style(doc, 'Chat Paragraph', 'Normal')
                 p = doc.add_paragraph(style=style)
-                if child.text:
-                    p.add_run(child.text.lstrip('\n\t'))
                 apply_inline_styles(child, p)
             else:
                 p = doc.add_paragraph(style=get_safe_style(doc, 'Normal'))
-                if child.text:
-                    p.add_run(child.text.lstrip('\n\t'))
                 apply_inline_styles(child, p)
                 
         elif child.tag == 'h':
@@ -320,13 +302,11 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                 record_name = link.get("recordname") or link.text or ""
                 link_text = clean_xml_text(link)
                 
-                # Intercept combat encounter logs
                 if link_class == "battle":
                     success = embed_encounter_table(doc, record_name, xml_root)
                     if success:
                         continue
                         
-                # Intercept currency and item caches
                 if link_class == "treasureparcel":
                     success = embed_parcel_table(doc, record_name, xml_root)
                     if success:
@@ -345,6 +325,9 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                     bookmark_name = f"REF_VEHICLE_{record_name.split('.')[-1]}"
                 elif "location.id-" in record_name:
                     bookmark_name = f"REF_LOCATION_{record_name.split('.')[-1]}"
+                # FIXED: Standardized link generation tracker to look for the new singular 'starship' path keys
+                elif "starships.id-" in record_name or "starship.id-" in record_name:
+                    bookmark_name = f"REF_STARSHIP_{record_name.split('.')[-1]}"
                 
                 if bookmark_name:
                     insert_internal_hyperlink(p, link_text, bookmark_name)

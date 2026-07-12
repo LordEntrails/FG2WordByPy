@@ -101,10 +101,16 @@ def render_starships_appendix(mod_zip, structured_categories, doc_base, blueprin
             print("    Ensure variables match: {% for cat in categories %} and {% for ship in cat.starships %}")
 
         print("[DIAGNOSTIC] Merging rendered elements into master document...")
-        doc_base.add_page_break()
         
         merge_count = 0
+        # Filtered layout strategy to append elements and strip blank paragraph spaces safely using doc_base
         for element in tpl.element.body:
+            if hasattr(element, 'tag'):
+                if element.tag.endswith('sectPr'):
+                    continue
+                # Discard empty whitespace line breaks added by Word formatting blocks
+                if element.tag.endswith('p') and not element.text and len(list(element)) == 0:
+                    continue
             doc_base.element.body.append(element)
             merge_count += 1
             

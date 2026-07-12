@@ -39,16 +39,10 @@ def render_quests_appendix(mod_zip, quests_data, master_doc, template_path, appe
 
     try:
         tpl.render(context)
-        master_doc.add_page_break()
-        
-        # Filter out section property blocks to prevent XML corruption
         for element in tpl.element.body:
-            if hasattr(element, 'tag') and element.tag.endswith('sectPr'):
-                continue
+            # ... your element filtering logic ...
             master_doc.element.body.append(element)
-            
-        print("[SUCCESS] Quest manifest reference index compiled successfully with styled tables.")
         return True
     except Exception as render_err:
-        print(f"[!] Quest appendix generation failed. Error Details: {render_err}")
+        print(f"[!] Rendering failed: {render_err}")
         return False

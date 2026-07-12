@@ -91,7 +91,13 @@ def render_tables_appendix(mod_zip, tables_data, master_doc, template_path, appe
         
     context = {"tables": tables_data, "appendix_label": appendix_label}
     tpl.render(context)
-    master_doc.add_page_break()
-    for element in tpl.element.body:
-        master_doc.element.body.append(element)
-    return True
+    
+    try:
+        tpl.render(context)
+        for element in tpl.element.body:
+            # ... your element filtering logic ...
+            master_doc.element.body.append(element)
+        return True
+    except Exception as render_err:
+        print(f"[!] Rendering failed: {render_err}")
+        return False

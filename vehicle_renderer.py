@@ -76,10 +76,15 @@ def render_vehicle_appendix(mod_zip, vehicles_data, master_doc, template_path, a
 
     try:
         tpl.render(context)
-        master_doc.add_page_break()
+        
+        # Filtered layout strategy to append elements and strip blank paragraph spaces
         for element in tpl.element.body:
-            if hasattr(element, 'tag') and element.tag.endswith('sectPr'):
-                continue
+            if hasattr(element, 'tag'):
+                if element.tag.endswith('sectPr'):
+                    continue
+                # Discard empty whitespace line breaks added by Word formatting blocks
+                if element.tag.endswith('p') and not element.text and len(list(element)) == 0:
+                    continue
             master_doc.element.body.append(element)
         print("[SUCCESS] Vehicle appendix compiled into chronicle workbook.")
         return True

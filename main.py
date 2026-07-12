@@ -101,7 +101,7 @@ def main():
             {"id": "npc",        "is_appendix": True},
             {"id": "item",       "is_appendix": True},
             {"id": "vehicle",    "is_appendix": True},
-            {"id": "starship",  "is_appendix": True},
+            {"id": "starship",   "is_appendix": True},
             {"id": "location",   "is_appendix": True},
             {"id": "table",      "is_appendix": True},
             {"id": "quest",      "is_appendix": True}
@@ -153,6 +153,23 @@ def main():
                 if data_payload:
                     renderer_module = rf.get_renderer_module(component)
                     if renderer_module:
+                        
+                        # --- STRENGTHENED RECORD CONTENT CHECK ---
+                        has_records = False
+                        if isinstance(data_payload, list):
+                            if len(data_payload) > 0:
+                                # Check structured groups like starships or npcs
+                                if "npcs" in data_payload[0] or "starships" in data_payload[0]:
+                                    inner_count = sum(len(group.get("npcs", []) or group.get("starships", [])) for group in data_payload)
+                                    if inner_count > 0:
+                                        has_records = True
+                                else:
+                                    has_records = True
+
+                        # If there are no records, skip completely to prevent trailing template gaps!
+                        if not has_records:
+                            continue
+
                         # 1. Register anchors dynamically for the post-processor bookmark sweep
                         if component == "npc":
                             for group in data_payload:
@@ -178,26 +195,25 @@ def main():
                             for q in data_payload:
                                 processed_quests.append((q["name"], f"REF_QUEST_{q['raw_node'].tag}"))
 
-                       # 2. Grab standard naming conventions for the layout template
+                        # 2. Grab standard naming conventions for the layout template
                         template_file = rf.get_template_path(component)
                         
                         # 3. Find the polymorphic render function dynamically (check singular first)
                         render_func_name = f"render_{component}_appendix"
                         render_func = getattr(renderer_module, render_func_name, None)
                         
-                        # Fallback to checking plural name (e.g., render_quests_appendix)
                         if render_func is None:
                             render_func_name = f"render_{component}s_appendix"
                             render_func = getattr(renderer_module, render_func_name, None)
                         
                         if render_func:
-                            # 4. Invoke the target renderer module execution pass
+                            # 4. Invoke the target renderer module execution pass (Continuous layout flow)
                             render_func(mod_zip, data_payload, doc, template_file, current_appendix)
                             if step["is_appendix"]: 
                                 appendix_ptr += 1
                         else:
-                            print(f"[!] Engine Error: Could not find function '{f'render_{component}_appendix'}' or '{render_func_name}' inside module.")
-        
+                            print(f"[!] Engine Error: Could not find function '{render_func_name}' inside module.")
+                                
         # =====================================================================
         # 4.9 SAFE POST-PROCESS BLOCKMARK PASS
         # =====================================================================
