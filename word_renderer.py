@@ -160,15 +160,19 @@ def embed_encounter_table(doc, record_name, xml_root):
             for run in p.runs:
                 run.bold = True
 
+    # Tracking variable to ensure unique local target IDs inside table frames
+    local_b_id = 5000 
+
     for child in npclist.findall('*'):
         count = clean_xml_text(child.find("count")) or "1"
         npc_name = clean_xml_text(child.find("name")) or "Unknown Combatant"
         
         npc_link_node = child.find("link")
         bookmark_anchor = ""
+        
         if npc_link_node is not None:
             rec_ref = npc_link_node.get("recordname") or npc_link_node.text or ""
-            if "npc.id-" in rec_ref:
+            if "npc.id-" in rec_ref and "@" not in rec_ref:
                 target_id = rec_ref.split('.')[-1]
                 bookmark_anchor = f"REF_NPC_{target_id}"
 
@@ -179,8 +183,25 @@ def embed_encounter_table(doc, record_name, xml_root):
         
         p_name = row_cells[1].paragraphs[0]
         p_name.style = get_safe_style(doc, 'Normal')
+        
         if bookmark_anchor:
+            # 1. Create the live hyperlinked text run inside the cell
             insert_internal_hyperlink(p_name, npc_name, bookmark_anchor)
+            
+            # 2. FIXED ROOT CAUSE: Force-inject the OXML paragraph bookmark target definitions
+            # directly onto the cell context so Word registers them immediately!
+            import docx.oxml as oxml
+            import docx.oxml.ns as ns
+            p_element = p_name._p
+            b_start = oxml.shared.OxmlElement('w:bookmarkStart')
+            b_start.set(ns.qn('w:id'), str(local_b_id))
+            b_start.set(ns.qn('w:name'), bookmark_anchor)
+            b_end = oxml.shared.OxmlElement('w:bookmarkEnd')
+            b_end.set(ns.qn('w:id'), str(local_b_id))
+            
+            p_element.insert(0, b_start)
+            p_element.append(b_end)
+            local_b_id += 1
         else:
             p_name.add_run(npc_name)
             
@@ -374,7 +395,7 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=
                             # Add spacing and append the source text run styled in clean italics
                             run_source = p.add_run(f" (See: {external_source})")
                             run_source.italic = True
-                                    
+
         elif child.tag == 'table':
             xml_rows = child.findall('tr')
             if xml_rows:

@@ -16,6 +16,7 @@ def apply_safe_bookmarks(doc):
     Scans the compiled document paragraphs to apply clean, non-corrupting 
     XML bookmarks directly over target record header lines.
     """
+    # Section Telemetry Keep
     print("Running document post-processor: Injecting live bookmark links...")
     bookmark_id = 1000  
     
@@ -49,6 +50,7 @@ def main():
             print(f"[!] Error: Could not find module package: '{MOD_FILE}'")
             return
 
+        # Macro Pipeline Telemetry
         print(f"--- Initiating Fantasy Grounds Module Extraction Pipeline ---")
         print(f"Target Archive: {MOD_FILE}")
 
@@ -143,8 +145,11 @@ def main():
                                     if header_text:
                                         doc.add_paragraph(header_text, style=word_renderer.get_safe_style(doc, 'Heading 4'))
                                 
-                                # SINGLE SOURCE OF TRUTH: Let the formatted text handler process the block elements natively
-                                text_node = block.find("text[@type='formattedtext']") or block.find("image")
+                                # FIXED ROOT CAUSE: Explicitly evaluated presence structure checks to avoid Element truthiness deprecation
+                                text_node = block.find("text[@type='formattedtext']")
+                                if text_node is None:
+                                    text_node = block.find("image")
+                                    
                                 if text_node is not None:
                                     word_renderer.write_formatted_text(text_node, doc, block_type=block_type, xml_root=db_root, mod_zip=mod_zip)
             else:
@@ -207,18 +212,38 @@ def main():
                         else:
                             print(f"[!] Engine Error: Could not find function '{render_func_name}' inside module.")
                                 
+        # =====================================================================
+        # 4.9 ENHANCED POST-PROCESS BLOCKMARK PASS
+        # =====================================================================
         print("\nResolving cross-reference anchors safely...")
         b_id = 2000
         all_targets = (processed_npcs + processed_items + processed_vehicles + 
                     processed_starships + processed_locations + processed_tables + processed_quests)
         
+        # 1. Sweep Paragraph text elements with hardened fuzzy checks
         for paragraph in doc.paragraphs:
             text_line = paragraph.text.strip()
+            if not text_line:
+                continue
             for name, bookmark_name in list(all_targets):
-                if text_line == name or text_line.startswith(name + " |") or text_line.startswith("Appendix " + name) or text_line.endswith("– " + name):
+                if (text_line == name or 
+                    text_line.startswith(name) or 
+                    name in text_line or
+                    text_line.endswith("– " + name)):
+                    
                     add_paragraph_bookmark(paragraph, bookmark_name, b_id)
                     b_id += 1
-                    all_targets.remove((name, bookmark_name))
+
+        # 2. Sweep Table Cell elements to catch targets inside text grids cleanly
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        text_line = paragraph.text.strip()
+                        for name, bookmark_name in list(all_targets):
+                            if text_line == name or name in text_line:
+                                add_paragraph_bookmark(paragraph, bookmark_name, b_id)
+                                b_id += 1
 
         mod_zip.close()
         doc.save(OUTPUT_FILE)
