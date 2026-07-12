@@ -93,6 +93,7 @@ def main():
         processed_starships = []
         processed_locations = []
         processed_tables = []
+        processed_quests = []
 
         # Sequential processing order matrix
         pipeline_order = [
@@ -102,7 +103,8 @@ def main():
             {"id": "vehicle",    "is_appendix": True},
             {"id": "starships",  "is_appendix": True},
             {"id": "location",   "is_appendix": True},
-            {"id": "tables",     "is_appendix": True}
+            {"id": "tables",     "is_appendix": True},
+            {"id": "quest",     "is_appendix": True}
         ]
 
         appendix_letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]
@@ -231,6 +233,35 @@ def main():
                         appendix_label=current_appendix
                     )
                     if step["is_appendix"]: appendix_ptr += 1
+            
+            elif component == "quest":
+                import quest_parser
+                quests_data = quest_parser.get_quests_catalog(db_root)
+                
+                if quests_data:
+                    import quest_renderer
+                    for q in quests_data:
+                        processed_quests.append((q["name"], f"REF_QUEST_{q['raw_node'].tag}"))
+                        
+                    quest_template = rf.get_template_path("quest")
+                    print(f"[DIAGNOSTIC] Factory returned Quest template path: '{quest_template}'")
+                    
+                    if not quest_template or not os.path.exists(quest_template):
+                        print(f"[!] CONFIG ERROR: Quest blueprint file path invalid or missing in factory setup!")
+                        # Fallback path if factory lacks configuration entry
+                        quest_template = os.path.join("templates", "FS_Quest_Template.docx")
+                        print(f"    Attempting hardcoded workspace fallback layout path: '{quest_template}'")
+
+                    quest_renderer.render_quests_appendix(
+                        mod_zip=mod_zip,
+                        quests_data=quests_data,
+                        master_doc=doc,
+                        template_path=quest_template,
+                        appendix_label=current_appendix
+                    )
+                    if step["is_appendix"]: appendix_ptr += 1
+                else:
+                    print("[INFO] Quest block evaluated to empty or no <quest> elements found in database.")
 
         # =====================================================================
         # 4.9 SAFE POST-PROCESS BLOCKMARK PASS
@@ -238,7 +269,7 @@ def main():
         print("\nResolving cross-reference anchors safely...")
         b_id = 2000
         all_targets = (processed_npcs + processed_items + processed_vehicles + 
-                       processed_starships + processed_locations + processed_tables)
+                    processed_starships + processed_locations + processed_tables + processed_quests)
         
         for paragraph in doc.paragraphs:
             text_line = paragraph.text.strip()
