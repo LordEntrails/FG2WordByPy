@@ -101,11 +101,11 @@ def embed_encounter_table(doc, record_name, xml_root):
     """
     Finds a <battle> record inside db.xml, extracts its combatant list,
     and writes a concise encounter table directly inline with live links.
+    Locks explicit column widths to prevent page formatting distortion.
     """
     if xml_root is None or not record_name:
         return False
         
-    # Example record_name: "battle.id-00003" -> locate target node id-00003
     node_id = record_name.split('.')[-1] if '.' in record_name else record_name
     battle_node = xml_root.find(f"./battle/{node_id}")
     
@@ -135,10 +135,18 @@ def embed_encounter_table(doc, record_name, xml_root):
     table.last_column = False
     table.column_banding = False
     
-    # Headers
+    # Explicit Column Width Layout Locks
+    QTY_WIDTH = Inches(0.75)
+    DESC_WIDTH = Inches(2.75)
+    
+    # Format Headers
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Qty"
     hdr_cells[1].text = "Combatant Designation"
+    
+    hdr_cells[0].width = QTY_WIDTH
+    hdr_cells[1].width = DESC_WIDTH
+    
     for cell in hdr_cells:
         for p in cell.paragraphs:
             p.style = get_safe_style(doc, 'Normal')
@@ -150,7 +158,7 @@ def embed_encounter_table(doc, record_name, xml_root):
         count = clean_xml_text(child.find("count")) or "1"
         npc_name = clean_xml_text(child.find("name")) or "Unknown Combatant"
         
-        # Pull the absolute reference to establish our internal appendix anchor
+        # Pull reference link to establish internal appendix anchor mapping
         npc_link_node = child.find("link")
         bookmark_anchor = ""
         if npc_link_node is not None:
@@ -160,12 +168,14 @@ def embed_encounter_table(doc, record_name, xml_root):
                 bookmark_anchor = f"REF_NPC_{target_id}"
 
         row_cells = table.add_row().cells
+        row_cells[0].width = QTY_WIDTH
+        row_cells[1].width = DESC_WIDTH
+        
         row_cells[0].text = f"{count}x"
         
         p_name = row_cells[1].paragraphs[0]
         p_name.style = get_safe_style(doc, 'Normal')
         if bookmark_anchor:
-            # Inject live cross-reference hyperlink point straight to the Appendix
             insert_internal_hyperlink(p_name, npc_name, bookmark_anchor)
         else:
             p_name.add_run(npc_name)
@@ -262,5 +272,5 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                         for paragraph in word_cell.paragraphs:
                             paragraph.style = get_safe_style(doc, 'Normal')
                             if r_idx == 0:
-                                for run in paragraph.runs:
-                                    run.bold = True
+                                        for run in paragraph.runs:
+                                            run.bold = True

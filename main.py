@@ -25,14 +25,8 @@ def apply_safe_bookmarks(doc):
             continue
             
         bookmark_name = ""
-        # 1. Detect Heading lines matching our output variables
         if paragraph.style.name.startswith('Heading') or text.startswith('⚡') or "Type:" in text:
-            # We check the paragraph text or structural patterns to match target strings
             pass
-
-    # A more bulletproof way is checking our known dataset arrays directly against paragraph lookups
-    # Let's run an exact matching sweep across the document tables/paragraphs for entries
-    # to avoid complex string heuristics:
     return
 
 def add_paragraph_bookmark(paragraph, bookmark_name, b_id):
@@ -46,7 +40,6 @@ def add_paragraph_bookmark(paragraph, bookmark_name, b_id):
     b_end = oxml.shared.OxmlElement('w:bookmarkEnd')
     b_end.set(ns.qn('w:id'), str(b_id))
     
-    # Prepend the start anchor to the front of the paragraph nodes safely
     p_element.insert(0, b_start)
     p_element.append(b_end)
 
@@ -93,19 +86,21 @@ def main():
             
         doc.add_heading("Campaign Narrative & Roster", level=1)
         
-        # Keep track of records we process to pass to our post-processor anchor injector
+        # FIXED: Initialized all reference tracking arrays cleanly together
         processed_npcs = []
         processed_items = []
         processed_vehicles = []
+        processed_locations = []
 
         pipeline_order = [
             {"id": "story",      "is_appendix": False},
             {"id": "npc",        "is_appendix": True},
             {"id": "item",       "is_appendix": True},
-            {"id": "vehicle",    "is_appendix": True}
+            {"id": "vehicle",    "is_appendix": True},
+            {"id": "location",   "is_appendix": True}
         ]
 
-        appendix_letters = ["A", "B", "C", "D", "E"]
+        appendix_letters = ["A", "B", "C", "D", "E", "F"]
         appendix_ptr = 0
 
         for step in pipeline_order:
@@ -149,7 +144,6 @@ def main():
                 npcs = fg_parser.get_npc_catalog(db_root)
                 if npcs:
                     import npc_renderer
-                    # Track IDs for post-processing bookmarking
                     for group in npcs:
                         for n in group["npcs"]:
                             processed_npcs.append((n["name"], f"REF_NPC_{n['raw_node'].tag}"))
@@ -177,20 +171,34 @@ def main():
                     vehicle_renderer.render_vehicle_appendix(mod_zip, vehicles_data, doc, vehicle_template, current_appendix)
                     if step["is_appendix"]: appendix_ptr += 1
 
+            elif component == "location":
+                location_data = rf.execute_parser("location", db_root)
+                if location_data:
+                    import location_renderer
+                    for loc in location_data:
+                        processed_locations.append((loc["name"], f"REF_LOCATION_{loc['raw_node'].tag}"))
+                        
+                    loc_template = rf.get_template_path("location")
+                    location_renderer.render_location_appendix(
+                        mod_zip=mod_zip,
+                        locations_data=location_data,
+                        master_doc=doc,
+                        template_path=loc_template,
+                        appendix_label=current_appendix
+                    )
+                    if step["is_appendix"]: appendix_ptr += 1
+
         # =====================================================================
         # 4.9 SAFE POST-PROCESS BLOCKMARK PASS
         # =====================================================================
-        # Scan headings in the document to safely attach OpenXML links without corruption
         print("\nResolving cross-reference anchors safely...")
         b_id = 2000
-        all_targets = processed_npcs + processed_items + processed_vehicles
+        all_targets = processed_npcs + processed_items + processed_vehicles + processed_locations
         
         for paragraph in doc.paragraphs:
             text_line = paragraph.text.strip()
-            # If the paragraph matches an exact asset header name, stamp it!
             for name, bookmark_name in list(all_targets):
-                # Match name exactly, or if it contains data parameters split by a pipes line
-                if text_line == name or text_line.startswith(name + " |"):
+                if text_line == name or text_line.startswith(name + " |") or text_line.startswith("Appendix " + name) or text_line.endswith("– " + name):
                     add_paragraph_bookmark(paragraph, bookmark_name, b_id)
                     b_id += 1
                     all_targets.remove((name, bookmark_name))
