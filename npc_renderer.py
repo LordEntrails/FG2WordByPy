@@ -31,7 +31,8 @@ def render_npc_appendix(mod_zip, structured_categories, doc_base, blueprint_path
     if not structured_categories or not os.path.exists(blueprint_path):
         return
 
-    print(f"Injecting {len(structured_categories)} sorted category tracks into blueprints...")
+    # SILENCED: Commented out the granular category tracking log
+    # print(f"Injecting {len(structured_categories)} sorted category tracks into blueprints...")
     tpl = DocxTemplate(blueprint_path)
 
     for group in structured_categories:

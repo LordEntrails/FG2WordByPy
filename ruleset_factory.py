@@ -1,6 +1,8 @@
 import importlib
 import os
-import fg_parser  # Import your global parser fallback module cleanly
+import fg_parser
+import npc_parser   
+import item_parser
 
 class RulesetFactory:
     """
@@ -34,8 +36,10 @@ class RulesetFactory:
             module_name = "fs_vehicle_parser"
         elif component_name == "starship":
             module_name = "fs_starships_parser"
-        elif component_name in ["npc", "item"]:
-            module_name = "fg_parser"
+        elif component_name == "npc":
+            module_name = "npc_parser" 
+        elif component_name == "item":
+            module_name = "item_parser"
         else:
             module_name = f"{component_name.lower()}_parser"
             

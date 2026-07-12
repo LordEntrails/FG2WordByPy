@@ -6,6 +6,7 @@ import docx.oxml as oxml
 import docx.oxml.ns as ns
 import fg_parser
 import word_renderer
+import story_parser
 from ruleset_factory import RulesetFactory
 
 MOD_FILE = "FS_MtN.mod"
@@ -118,7 +119,7 @@ def main():
 
             if component == "story":
                 print(f"\nProcessing structured narrative hierarchy...")
-                story_pages = fg_parser.harvest_ordered_story_pages(db_root)
+                story_pages = story_parser.harvest_ordered_story_pages(db_root)
                 for element in story_pages:
                     item_type = element[0]
                     if item_type == 'chapter':
