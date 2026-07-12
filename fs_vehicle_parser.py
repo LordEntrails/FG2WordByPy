@@ -24,7 +24,7 @@ def get_vehicle_catalog(root):
             print(f"  [Vehicle Node {idx}] Skipped: Child node is missing a structural <name> tag.")
             continue
 
-        print(f"  [Vehicle Node {idx}] Processing Target: '{veh_name}'")
+        # print(f"  [Vehicle Node {idx}] Processing Target: '{veh_name}'")
 
         # Extract nested inventory components (like integrated GPS/Radios)[cite: 13]
         components_array = []

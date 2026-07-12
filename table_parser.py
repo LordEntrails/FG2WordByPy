@@ -18,7 +18,7 @@ def get_tables_catalog(root):
         if not t_name:
             continue
             
-        print(f"  [Table Node {idx}] Packaging configuration parameters for: '{t_name}'")
+        # print(f"  [Table Node {idx}] Packaging configuration parameters for: '{t_name}'")
         
         # Calculate human-readable roll calculation metrics
         dice = clean_xml_text(table_node.find("dice")) or ""

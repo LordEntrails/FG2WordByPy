@@ -32,7 +32,7 @@ def create_starship_image_subdoc(tpl, mod_zip, asset_path, target_width=3.5):
 def render_starships_appendix(mod_zip, structured_categories, doc_base, blueprint_path, appendix_label=""):
     print("\n--- [TELEMETRY START: STARSHIPS RENDERER] ---")
     print(f"[DIAGNOSTIC] Blueprint Path: '{blueprint_path}'")
-    print(f"[DIAGNOSTIC] Appendix Label: '{appendix_label}'")
+    # print(f"[DIAGNOSTIC] Appendix Label: '{appendix_label}'")
     
     if not os.path.exists(blueprint_path):
         print(f"[!] TELEMETRY ERROR: Starship template file does not exist at path!")
@@ -42,33 +42,33 @@ def render_starships_appendix(mod_zip, structured_categories, doc_base, blueprin
         print("[!] TELEMETRY WARNING: structured_categories array is completely EMPTY or None.")
         return False
 
-    print(f"[DIAGNOSTIC] Initializing DocxTemplate with blueprint.")
+    # print(f"[DIAGNOSTIC] Initializing DocxTemplate with blueprint.")
     tpl = DocxTemplate(blueprint_path)
 
     for c_idx, group in enumerate(structured_categories, 1):
-        print(f"  -> Category Folder [{c_idx}]: '{group.get('name')}' (Contains {len(group.get('starships', []))} starships)")
+        # print(f"  -> Category Folder [{c_idx}]: '{group.get('name')}' (Contains {len(group.get('starships', []))} starships)")
         
         for s_idx, ship in enumerate(group.get("starships", []), 1):
             raw_node = ship["raw_node"]
-            print(f"     [{s_idx}] Packaging Template Context variables for: '{ship['name']}'")
+            # print(f"     [{s_idx}] Packaging Template Context variables for: '{ship['name']}'")
             
             # Blueprint Image Processing
             pic_path = raw_node.findtext("picture") or ""
             if pic_path:
-                print(f"       - Found picture node path: '{pic_path}'")
+                # print(f"       - Found picture node path: '{pic_path}'")
                 ship["picture"] = create_starship_image_subdoc(tpl, mod_zip, pic_path, target_width=3.5)
             else:
-                print("       - No picture node path found.")
+                # print("       - No picture node path found.")
                 ship["picture"] = ""
             
             # Description Processing
             desc_node = raw_node.find("description")
             if desc_node is not None:
-                print("       - Found description <formattedtext> block. Building subdoc...")
+                # print("       - Found description <formattedtext> block. Building subdoc...")
                 subdoc_desc = tpl.new_subdoc()
                 write_formatted_text(desc_node, subdoc_desc, xml_root=raw_node)
                 ship["description"] = subdoc_desc
-                print(f"         Subdoc text generated paragraph count: {len(subdoc_desc.paragraphs)}")
+                # print(f"         Subdoc text generated paragraph count: {len(subdoc_desc.paragraphs)}")
             else:
                 print("       - Description block missing.")
                 ship["description"] = "No structural description logs archived."

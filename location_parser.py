@@ -23,7 +23,7 @@ def get_location_catalog(root):
         if not loc_name:
             continue
 
-        print(f"  [Location Node {idx}] Processing Sector: '{loc_name}'")
+        # print(f"  [Location Node {idx}] Processing Sector: '{loc_name}'")
 
         location_data = {
             "name": loc_name,

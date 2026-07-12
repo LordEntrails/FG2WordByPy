@@ -22,7 +22,7 @@ def get_quests_catalog(root):
         if not q_name:
             continue
             
-        print(f"  [Quest Node {idx}] Packaging tracking logs for: '{q_name}'")
+        # print(f"  [Quest Node {idx}] Packaging tracking logs for: '{q_name}'")
         
         quests_list.append({
             "name": q_name,

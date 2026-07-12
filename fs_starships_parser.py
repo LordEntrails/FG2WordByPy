@@ -19,7 +19,7 @@ def get_starships_catalog(root):
         if not ship_name:
             return None
             
-        print(f"  [Starship Data] Processing Hull Profile: '{ship_name}'")
+        # print(f"  [Starship Data] Processing Hull Profile: '{ship_name}'")
         
         return {
             "name": ship_name,
