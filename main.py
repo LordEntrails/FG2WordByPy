@@ -86,23 +86,26 @@ def main():
             
         doc.add_heading("Campaign Narrative & Roster", level=1)
         
-        # FIXED: Initialized all reference tracking arrays cleanly together
+        # Reference Tracking Registers for Post-Processing Hyperlinks
         processed_npcs = []
         processed_items = []
         processed_vehicles = []
         processed_starships = []
         processed_locations = []
+        processed_tables = []
 
+        # Sequential processing order matrix
         pipeline_order = [
             {"id": "story",      "is_appendix": False},
             {"id": "npc",        "is_appendix": True},
             {"id": "item",       "is_appendix": True},
             {"id": "vehicle",    "is_appendix": True},
             {"id": "starships",  "is_appendix": True},
-            {"id": "location",   "is_appendix": True}
+            {"id": "location",   "is_appendix": True},
+            {"id": "tables",     "is_appendix": True}
         ]
 
-        appendix_letters = ["A", "B", "C", "D", "E", "F"]
+        appendix_letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]
         appendix_ptr = 0
 
         for step in pipeline_order:
@@ -173,7 +176,6 @@ def main():
                     vehicle_renderer.render_vehicle_appendix(mod_zip, vehicles_data, doc, vehicle_template, current_appendix)
                     if step["is_appendix"]: appendix_ptr += 1
 
-            # --- ADDED: STEP 3 FIXED INTEGRATION ---
             elif component == "starships":
                 import fs_starships_parser
                 starships_data = fs_starships_parser.get_starships_catalog(db_root)
@@ -212,12 +214,31 @@ def main():
                     )
                     if step["is_appendix"]: appendix_ptr += 1
 
+            elif component == "tables":
+                import table_parser
+                tables_data = table_parser.get_tables_catalog(db_root)
+                if tables_data:
+                    import table_renderer
+                    for t in tables_data:
+                        processed_tables.append((t["name"], f"REF_TABLE_{t['raw_node'].tag}"))
+                        
+                    table_template = rf.get_template_path("tables")
+                    table_renderer.render_tables_appendix(
+                        mod_zip=mod_zip,
+                        tables_data=tables_data,
+                        master_doc=doc,
+                        template_path=table_template,
+                        appendix_label=current_appendix
+                    )
+                    if step["is_appendix"]: appendix_ptr += 1
+
         # =====================================================================
         # 4.9 SAFE POST-PROCESS BLOCKMARK PASS
         # =====================================================================
         print("\nResolving cross-reference anchors safely...")
         b_id = 2000
-        all_targets = processed_npcs + processed_items + processed_vehicles + processed_starships + processed_locations
+        all_targets = (processed_npcs + processed_items + processed_vehicles + 
+                       processed_starships + processed_locations + processed_tables)
         
         for paragraph in doc.paragraphs:
             text_line = paragraph.text.strip()
