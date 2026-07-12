@@ -17,7 +17,7 @@ def apply_safe_bookmarks(doc):
     XML bookmarks directly over target record header lines.
     """
     print("Running document post-processor: Injecting live bookmark links...")
-    bookmark_id = 1000  # Unique ID tracker to keep OpenXML schema happy
+    bookmark_id = 1000  
     
     for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
@@ -143,9 +143,25 @@ def main():
                                     if header_text:
                                         doc.add_paragraph(header_text, style=word_renderer.get_safe_style(doc, 'Heading 4'))
                                 
+                                # Process Standard Formatted Text Blocks
                                 text_node = block.find("text[@type='formattedtext']")
                                 if text_node is not None:
-                                    word_renderer.write_formatted_text(text_node, doc, block_type=block_type, xml_root=db_root)
+                                    word_renderer.write_formatted_text(text_node, doc, block_type=block_type, xml_root=db_root, mod_zip=mod_zip)
+
+                                # FIXED: Extract and scale standalone image blocks inside RefManual layout frames
+                                if block_type == 'image':
+                                    image_tag = block.find(".//image")
+                                    if image_tag is not None:
+                                        bitmap_path = image_tag.findtext(".//bitmap") or ""
+                                        if bitmap_path:
+                                            word_renderer.extract_and_insert_image(mod_zip, bitmap_path, doc)
+                                            
+                                            caption_text = fg_parser.clean_xml_text(image_tag.find(".//caption"))
+                                            if caption_text:
+                                                p_cap = doc.add_paragraph()
+                                                p_cap.alignment = 1
+                                                run_cap = p_cap.add_run(caption_text)
+                                                run_cap.italic = True
 
             else:
                 # DYNAMICAL ROUTING FOR ALL APPENDICES
@@ -154,11 +170,9 @@ def main():
                     renderer_module = rf.get_renderer_module(component)
                     if renderer_module:
                         
-                        # --- STRENGTHENED RECORD CONTENT CHECK ---
                         has_records = False
                         if isinstance(data_payload, list):
                             if len(data_payload) > 0:
-                                # Check structured groups like starships or npcs
                                 if "npcs" in data_payload[0] or "starships" in data_payload[0]:
                                     inner_count = sum(len(group.get("npcs", []) or group.get("starships", [])) for group in data_payload)
                                     if inner_count > 0:
@@ -166,11 +180,9 @@ def main():
                                 else:
                                     has_records = True
 
-                        # If there are no records, skip completely to prevent trailing template gaps!
                         if not has_records:
                             continue
 
-                        # 1. Register anchors dynamically for the post-processor bookmark sweep
                         if component == "npc":
                             for group in data_payload:
                                 for n in group["npcs"]:
@@ -195,10 +207,8 @@ def main():
                             for q in data_payload:
                                 processed_quests.append((q["name"], f"REF_QUEST_{q['raw_node'].tag}"))
 
-                        # 2. Grab standard naming conventions for the layout template
                         template_file = rf.get_template_path(component)
                         
-                        # 3. Find the polymorphic render function dynamically (check singular first)
                         render_func_name = f"render_{component}_appendix"
                         render_func = getattr(renderer_module, render_func_name, None)
                         
@@ -207,16 +217,12 @@ def main():
                             render_func = getattr(renderer_module, render_func_name, None)
                         
                         if render_func:
-                            # 4. Invoke the target renderer module execution pass (Continuous layout flow)
                             render_func(mod_zip, data_payload, doc, template_file, current_appendix)
                             if step["is_appendix"]: 
                                 appendix_ptr += 1
                         else:
                             print(f"[!] Engine Error: Could not find function '{render_func_name}' inside module.")
                                 
-        # =====================================================================
-        # 4.9 SAFE POST-PROCESS BLOCKMARK PASS
-        # =====================================================================
         print("\nResolving cross-reference anchors safely...")
         b_id = 2000
         all_targets = (processed_npcs + processed_items + processed_vehicles + 
@@ -230,7 +236,6 @@ def main():
                     b_id += 1
                     all_targets.remove((name, bookmark_name))
 
-        # Save out the finished workspace file
         mod_zip.close()
         doc.save(OUTPUT_FILE)
         print("\n--- SUCCESS ---")

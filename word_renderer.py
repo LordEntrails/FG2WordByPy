@@ -14,55 +14,77 @@ def get_safe_style(doc, style_name, default_fallback='Normal'):
         return style_name
     return default_fallback
 
-def apply_inline_styles(node, paragraph_obj):
+def apply_inline_styles(node, paragraph_obj, bold=False, italic=False, underline=False):
     """
-    Recursively steps through text nodes to find inline <b> or <i> tags,
-    carefully stripping code indents (\t) and raw line breaks (\n).
+    Recursively steps through text nodes, passing down formatting states
+    so nested inline tags (e.g., bold + underline) inherit styles correctly.
     """
     if node is None:
         return
 
-    # FIXED: Pass 'cleaned_text' into add_run instead of the raw, uncleaned text string
+    # 1. Inherit historical parent flags or trigger new ones based on the current tag
+    current_bold = bold or (node.tag == 'b')
+    current_italic = italic or (node.tag == 'i')
+    current_underline = underline or (node.tag == 'u')
+
+    # 2. Apply accumulated formatting parameters to the text segment
     if node.text:
         cleaned_text = node.text.lstrip('\n\t').rstrip('\n\t')
-        if cleaned_text or node.text == " ":  # Keep intentional spaces
-            paragraph_obj.add_run(cleaned_text)
-    
+        if cleaned_text or node.text == " ":
+            run = paragraph_obj.add_run(cleaned_text)
+            if current_bold: 
+                run.bold = True
+            if current_italic: 
+                run.italic = True
+            if current_underline: 
+                run.underline = True
+
+    # 3. Recurse into child nodes carrying forward the active style environment
     for child in node:
-        child_text = child.text if child.text else ""
-        cleaned_child_text = child_text.lstrip('\n\t').rstrip('\n\t')
+        apply_inline_styles(child, paragraph_obj, current_bold, current_italic, current_underline)
         
-        if child.tag == 'b':
-            run = paragraph_obj.add_run(cleaned_child_text)
-            run.bold = True
-        elif child.tag == 'i':
-            run = paragraph_obj.add_run(cleaned_child_text)
-            run.italic = True
-        else:
-            run = paragraph_obj.add_run(cleaned_child_text)
-            
-        apply_inline_styles(child, paragraph_obj)
-        
+        # 4. Process tail text using the original parent context scope
         if child.tail:
             cleaned_tail = child.tail.lstrip('\n\t').rstrip('\n\t')
             if cleaned_tail or child.tail == " ":
-                paragraph_obj.add_run(cleaned_tail)
+                run = paragraph_obj.add_run(cleaned_tail)
+                if bold: 
+                    run.bold = True
+                if italic: 
+                    run.italic = True
+                if underline: 
+                    run.underline = True
 
-def extract_and_insert_image(mod_zip, image_path, doc):
+def extract_and_insert_image(mod_zip, image_path, doc, target_width=3.5):
     try:
         with mod_zip.open(image_path) as img_file:
             image_stream = io.BytesIO(img_file.read())
+            
         with Image.open(image_stream) as img:
+            # FIXED: Dynamically calculate pixel geometry to prevent squeezing/stretching
+            width_px, height_px = img.size
+            aspect_ratio = height_px / width_px
+            target_height = target_width * aspect_ratio
+            
             output_stream = io.BytesIO()
             img.save(output_stream, format="PNG")
             output_stream.seek(0)
+            
             p_img = doc.add_paragraph()
-            p_img.alignment = 1 
-            p_img.add_run().add_picture(output_stream, width=Inches(3.5))
+            p_img.alignment = 1  # Center aligned
+            p_img.paragraph_format.space_before = Inches(0.1)
+            p_img.paragraph_format.space_after = Inches(0.1)
+            
+            # Secure insertion with both width and height locked down
+            p_img.add_run().add_picture(output_stream, width=Inches(target_width), height=Inches(target_height))
             return True
+            
     except KeyError:
         p = doc.add_paragraph(style=get_safe_style(doc, 'Normal'))
-        p.add_run(f"[MISSING IMAGE ASSET: {image_path}]").font.color.rgb = (200, 0, 0)
+        p.add_run(f"[MISSING IMAGE ASSET: {image_path}]").font.color.rgb = RGBColor(200, 0, 0)
+        return False
+    except Exception as e:
+        print(f"  [!] STORY IMAGE FAILURE: Failed to parse '{image_path}'. Error: {e}")
         return False
 
 def insert_internal_hyperlink(paragraph, text, bookmark_name):
@@ -114,7 +136,8 @@ def embed_encounter_table(doc, record_name, xml_root):
     p_title = doc.add_paragraph()
     p_title.paragraph_format.space_before = Inches(0.15)
     p_title.paragraph_format.space_after = Inches(0.05)
-    p_title.add_run(f"⚔️ Battle Deployment: {battle_name}").bold = True
+    # FIXED: Removed the sword icon from the title string array assignment pass
+    p_title.add_run(f"Battle Deployment: {battle_name}").bold = True
     
     npclist = battle_node.find("npclist")
     if npclist is None or not list(npclist):
@@ -268,7 +291,10 @@ def embed_parcel_table(doc, record_name, xml_root):
     p_spacer.paragraph_format.space_after = Inches(0.1)
     return True
 
-def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
+def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=None):
+    """
+    Interprets and renders formatted text, headers, links, and inline images.
+    """
     if xml_node is None:
         return
     for child in xml_node:
@@ -294,7 +320,22 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
             p = doc.add_paragraph(style=get_safe_style(doc, 'List Paragraph'))
             p.add_run("•\t")
             apply_inline_styles(child, p)
-            
+
+        elif child.tag == 'image':
+            # Handle inline image elements cleanly using the passed mod_zip ref
+            image_path = child.findtext("image") or ""
+            if image_path and mod_zip is not None:
+                extract_and_insert_image(mod_zip, image_path, doc)
+                
+                caption_text = clean_xml_text(child.find("caption"))
+                if caption_text:
+                    p_cap = doc.add_paragraph()
+                    p_cap.alignment = 1 
+                    p_cap.paragraph_format.space_before = Inches(0.02)
+                    p_cap.paragraph_format.space_after = Inches(0.1)
+                    run_cap = p_cap.add_run(caption_text)
+                    run_cap.italic = True
+
         elif child.tag in ['linklist', 'link']:
             links = child.findall('link') if child.tag == 'linklist' else [child]
             for link in links:
@@ -314,7 +355,6 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                 
                 style = get_safe_style(doc, 'Internal Link', 'Normal')
                 p = doc.add_paragraph(style=style)
-                p.add_run("o\t")
                 
                 bookmark_name = ""
                 if "npc.id-" in record_name:
@@ -325,7 +365,115 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None):
                     bookmark_name = f"REF_VEHICLE_{record_name.split('.')[-1]}"
                 elif "location.id-" in record_name:
                     bookmark_name = f"REF_LOCATION_{record_name.split('.')[-1]}"
-                # FIXED: Standardized link generation tracker to look for the new singular 'starship' path keys
+                elif "starships.id-" in record_name or "starship.id-" in record_name:
+                    bookmark_name = f"REF_STARSHIP_{record_name.split('.')[-1]}"
+                
+                if bookmark_name:
+                    insert_internal_hyperlink(p, link_text, bookmark_name)
+                else:
+                    p.add_run(link_text)
+                
+        elif child.tag == 'table':
+            xml_rows = child.findall('tr')
+            if xml_rows:
+                max_cols = max((len(r.findall('td')) + len(r.findall('th'))) for r in xml_rows)
+                word_table = doc.add_table(rows=len(xml_rows), cols=max_cols)
+                
+                word_table.style = 'Grid Table 4 Accent 1'
+                word_table.header_row = True
+                word_table.row_banding = True
+                word_table.first_column = False
+                word_table.last_column = False
+                word_table.column_banding = False
+                
+                for r_idx, xml_row in enumerate(xml_rows):
+                    cells = xml_row.findall('td') + xml_row.findall('th')
+                    for c_idx, cell in enumerate(cells):
+                        if c_idx >= max_cols:
+                            continue
+                            
+                        word_cell = word_table.cell(r_idx, c_idx)
+                        word_cell.text = clean_xml_text(cell)
+                        
+                        for paragraph in word_cell.paragraphs:
+                            paragraph.style = get_safe_style(doc, 'Normal')
+                            if r_idx == 0:
+                                for run in paragraph.runs:
+                                    run.bold = True
+    if xml_node is None:
+        return
+    for child in xml_node:
+        if child.tag == 'p':
+            if block_type == 'frame' or xml_node.tag == 'frame':
+                style = get_safe_style(doc, 'Chat Paragraph', 'Normal')
+                p = doc.add_paragraph(style=style)
+                apply_inline_styles(child, p)
+            else:
+                p = doc.add_paragraph(style=get_safe_style(doc, 'Normal'))
+                apply_inline_styles(child, p)
+                
+        elif child.tag == 'h':
+            p = doc.add_paragraph(style=get_safe_style(doc, 'Heading 5'))
+            p.add_run(clean_xml_text(child))
+            
+        elif child.tag == 'frame':
+            style = get_safe_style(doc, 'Chat Paragraph', 'Normal')
+            p = doc.add_paragraph(style=style)
+            apply_inline_styles(child, p)
+            
+        elif child.tag == 'li':
+            p = doc.add_paragraph(style=get_safe_style(doc, 'List Paragraph'))
+            p.add_run("•\t")
+            apply_inline_styles(child, p)
+
+        elif child.tag == 'image':
+            # 1. Look for the relative path tag inside the image block
+            image_path = child.findtext("image") or ""
+            if image_path:
+                # 2. Extract, format, scale to 3.5" wide, and stream into the active document context
+                extract_and_insert_image(mod_zip, image_path, doc)
+                
+                # 3. Check for an optional caption block beneath the asset log
+                caption_text = clean_xml_text(child.find("caption"))
+                if caption_text:
+                    p_cap = doc.add_paragraph()
+                    p_cap.alignment = 1  # Center aligned
+                    p_cap.paragraph_format.space_before = Inches(0.02)
+                    p_cap.paragraph_format.space_after = Inches(0.1)
+                    run_cap = p_cap.add_run(caption_text)
+                    run_cap.italic = True
+                    run_cap.font.size = docx.shared.Pt(10)
+
+        elif child.tag in ['linklist', 'link']:
+            links = child.findall('link') if child.tag == 'linklist' else [child]
+            for link in links:
+                link_class = link.get("class") or ""
+                record_name = link.get("recordname") or link.text or ""
+                link_text = clean_xml_text(link)
+                
+                if link_class == "battle":
+                    success = embed_encounter_table(doc, record_name, xml_root)
+                    if success:
+                        continue
+                        
+                if link_class == "treasureparcel":
+                    success = embed_parcel_table(doc, record_name, xml_root)
+                    if success:
+                        continue
+                
+                style = get_safe_style(doc, 'Internal Link', 'Normal')
+                p = doc.add_paragraph(style=style)
+                
+                # FIXED: Stripped the hardcoded "o\t" string to eliminate the double bullet layout glitch
+                bookmark_name = ""
+                if "npc.id-" in record_name:
+                    bookmark_name = f"REF_NPC_{record_name.split('.')[-1]}"
+                elif "item.id-" in record_name:
+                    bookmark_name = f"REF_ITEM_{record_name.split('.')[-1]}"
+                elif "vehicle.id-" in record_name:
+                    bookmark_name = f"REF_VEHICLE_{record_name.split('.')[-1]}"
+                elif "location.id-" in record_name:
+                    bookmark_name = f"REF_LOCATION_{record_name.split('.')[-1]}"
                 elif "starships.id-" in record_name or "starship.id-" in record_name:
                     bookmark_name = f"REF_STARSHIP_{record_name.split('.')[-1]}"
                 
