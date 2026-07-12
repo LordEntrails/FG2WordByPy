@@ -1,4 +1,6 @@
 import importlib
+import os
+import fg_parser  # Import your global parser fallback module cleanly
 
 class RulesetFactory:
     """
@@ -7,7 +9,6 @@ class RulesetFactory:
     """
     def __init__(self, ruleset_name):
         self.ruleset_raw = ruleset_name if ruleset_name else "Unknown"
-        # Normalize to lower ID: 'FrontierSpace' -> 'fs'
         self.ruleset_id = self.ruleset_raw.strip().lower()
         
         if "frontierspace" in self.ruleset_id:
@@ -21,24 +22,59 @@ class RulesetFactory:
         return self.ruleset_raw
 
     def get_template_path(self, component_name):
-        """Standardizes file names (e.g., 'story' -> 'FS_Story_Template.docx')"""
+        """Standardizes file names uniformly (e.g., 'starship' -> 'FS_Starship_Template.docx')"""
         return f"{self.docx_prefix}{component_name.capitalize()}_Template.docx"
 
     def execute_parser(self, component_name, xml_root, *args, **kwargs):
         """
         Dynamically locates, imports, and calls the designated module parser function.
-        Example: 'vehicle' -> calls fs_vehicle_parser.get_vehicle_catalog(xml_root)
+        Safely routes legacy CoreRPG components to fg_parser if independent files are missing.
         """
-        module_name = f"{self.py_prefix}{component_name.lower()}_parser"
-        function_name = f"get_{component_name.lower()}_catalog"
-        
+        if component_name == "vehicle":
+            module_name = "fs_vehicle_parser"
+        elif component_name == "starship":
+            module_name = "fs_starships_parser"
+        elif component_name in ["npc", "item"]:
+            module_name = "fg_parser"
+        else:
+            module_name = f"{component_name.lower()}_parser"
+            
         try:
             module = importlib.import_module(module_name)
-            parser_func = getattr(module, function_name)
+            
+            # Check singular function signature (e.g., get_starship_catalog)
+            function_name = f"get_{component_name.lower()}_catalog"
+            parser_func = getattr(module, function_name, None)
+            
+            # Fallback to plural function signature (e.g., get_starships_catalog, get_tables_catalog)
+            if parser_func is None:
+                function_name = f"get_{component_name.lower()}s_catalog"
+                parser_func = getattr(module, function_name)
+                
             return parser_func(xml_root, *args, **kwargs)
+        except (ModuleNotFoundError, AttributeError):
+            try:
+                function_name = f"get_{component_name.lower()}_catalog"
+                parser_func = getattr(fg_parser, function_name, None)
+                if parser_func is None:
+                    function_name = f"get_{component_name.lower()}s_catalog"
+                    parser_func = getattr(fg_parser, function_name)
+                return parser_func(xml_root, *args, **kwargs)
+            except AttributeError:
+                print(f"[INFO] No specialized rule-module parser found for '{component_name}'. Skipping pipeline stage.")
+                return None
+
+    def get_renderer_module(self, component_name):
+        """
+        Dynamically imports and returns the appropriate renderer module.
+        """
+        if component_name == "starship":
+            module_name = "fs_starships_renderer"
+        else:
+            module_name = f"{component_name.lower()}_renderer"
+
+        try:
+            return importlib.import_module(module_name)
         except ModuleNotFoundError:
-            print(f"[INFO] No specialized rule-module parser found for '{module_name}.py'. Skipping pipeline stage.")
-            return None
-        except AttributeError:
-            print(f"[!] Engine Error: Found script module '{module_name}', but function '{function_name}' is missing.")
+            print(f"[!] Engine Error: Renderer module '{module_name}.py' could not be found.")
             return None

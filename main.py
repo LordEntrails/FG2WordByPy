@@ -101,10 +101,10 @@ def main():
             {"id": "npc",        "is_appendix": True},
             {"id": "item",       "is_appendix": True},
             {"id": "vehicle",    "is_appendix": True},
-            {"id": "starships",  "is_appendix": True},
+            {"id": "starship",  "is_appendix": True},
             {"id": "location",   "is_appendix": True},
-            {"id": "tables",     "is_appendix": True},
-            {"id": "quest",     "is_appendix": True}
+            {"id": "table",      "is_appendix": True},
+            {"id": "quest",      "is_appendix": True}
         ]
 
         appendix_letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T"]
@@ -147,122 +147,57 @@ def main():
                                 if text_node is not None:
                                     word_renderer.write_formatted_text(text_node, doc, block_type=block_type, xml_root=db_root)
 
-            elif component == "npc":
-                npcs = fg_parser.get_npc_catalog(db_root)
-                if npcs:
-                    import npc_renderer
-                    for group in npcs:
-                        for n in group["npcs"]:
-                            processed_npcs.append((n["name"], f"REF_NPC_{n['raw_node'].tag}"))
-                    npc_template = rf.get_template_path("npc")
-                    npc_renderer.render_npc_appendix(mod_zip, npcs, doc, npc_template, current_appendix)
-                    if step["is_appendix"]: appendix_ptr += 1
+            else:
+                # DYNAMICAL ROUTING FOR ALL APPENDICES
+                data_payload = rf.execute_parser(component, db_root)
+                if data_payload:
+                    renderer_module = rf.get_renderer_module(component)
+                    if renderer_module:
+                        # 1. Register anchors dynamically for the post-processor bookmark sweep
+                        if component == "npc":
+                            for group in data_payload:
+                                for n in group["npcs"]:
+                                    processed_npcs.append((n["name"], f"REF_NPC_{n['raw_node'].tag}"))
+                        elif component == "item":
+                            for item in data_payload:
+                                processed_items.append((item["name"], f"REF_ITEM_{item['raw_node'].tag}"))
+                        elif component == "vehicle":
+                            for veh in data_payload:
+                                processed_vehicles.append((veh["name"], f"REF_VEHICLE_{veh['raw_node'].tag}"))
+                        elif component == "starship":
+                            for group in data_payload:
+                                for ship in group["starships"]:
+                                    processed_starships.append((ship["name"], f"REF_STARSHIP_{ship['raw_node'].tag}"))
+                        elif component == "location":
+                            for loc in data_payload:
+                                processed_locations.append((loc["name"], f"REF_LOCATION_{loc['raw_node'].tag}"))
+                        elif component == "table":
+                            for t in data_payload:
+                                processed_tables.append((t["name"], f"REF_TABLE_{t['raw_node'].tag}"))
+                        elif component == "quest":
+                            for q in data_payload:
+                                processed_quests.append((q["name"], f"REF_QUEST_{q['raw_node'].tag}"))
 
-            elif component == "item":
-                items_data = fg_parser.get_item_catalog(db_root)
-                if items_data:
-                    import item_renderer
-                    for item in items_data:
-                        processed_items.append((item["name"], f"REF_ITEM_{item['raw_node'].tag}"))
-                    item_template = rf.get_template_path("item")
-                    item_renderer.render_item_appendix(mod_zip, items_data, doc, item_template, current_appendix)
-                    if step["is_appendix"]: appendix_ptr += 1
-
-            elif component == "vehicle":
-                vehicles_data = rf.execute_parser("vehicle", db_root)
-                if vehicles_data:
-                    import vehicle_renderer
-                    for veh in vehicles_data:
-                        processed_vehicles.append((veh["name"], f"REF_VEHICLE_{veh['raw_node'].tag}"))
-                    vehicle_template = rf.get_template_path("vehicle")
-                    vehicle_renderer.render_vehicle_appendix(mod_zip, vehicles_data, doc, vehicle_template, current_appendix)
-                    if step["is_appendix"]: appendix_ptr += 1
-
-            elif component == "starships":
-                import fs_starships_parser
-                starships_data = fs_starships_parser.get_starships_catalog(db_root)
-                if starships_data:
-                    import starships_renderer
-                    for group in starships_data:
-                        for ship in group["starships"]:
-                            processed_starships.append((ship["name"], f"REF_STARSHIP_{ship['raw_node'].tag}"))
-                               
-                    ship_template = rf.get_template_path("starships")
-                    starships_renderer.render_starships_appendix(
-                        mod_zip=mod_zip,
-                        structured_categories=starships_data,
-                        doc_base=doc,
-                        blueprint_path=ship_template,
-                        appendix_label=current_appendix
-                    )
-                    if step["is_appendix"]: appendix_ptr += 1
-                else:
-                    print(f"[INFO] Empty Component Detected: Skipping {component.upper()} appendix block layout.")
-
-            elif component == "location":
-                location_data = rf.execute_parser("location", db_root)
-                if location_data:
-                    import location_renderer
-                    for loc in location_data:
-                        processed_locations.append((loc["name"], f"REF_LOCATION_{loc['raw_node'].tag}"))
+                       # 2. Grab standard naming conventions for the layout template
+                        template_file = rf.get_template_path(component)
                         
-                    loc_template = rf.get_template_path("location")
-                    location_renderer.render_location_appendix(
-                        mod_zip=mod_zip,
-                        locations_data=location_data,
-                        master_doc=doc,
-                        template_path=loc_template,
-                        appendix_label=current_appendix
-                    )
-                    if step["is_appendix"]: appendix_ptr += 1
-
-            elif component == "tables":
-                import table_parser
-                tables_data = table_parser.get_tables_catalog(db_root)
-                if tables_data:
-                    import table_renderer
-                    for t in tables_data:
-                        processed_tables.append((t["name"], f"REF_TABLE_{t['raw_node'].tag}"))
+                        # 3. Find the polymorphic render function dynamically (check singular first)
+                        render_func_name = f"render_{component}_appendix"
+                        render_func = getattr(renderer_module, render_func_name, None)
                         
-                    table_template = rf.get_template_path("tables")
-                    table_renderer.render_tables_appendix(
-                        mod_zip=mod_zip,
-                        tables_data=tables_data,
-                        master_doc=doc,
-                        template_path=table_template,
-                        appendix_label=current_appendix
-                    )
-                    if step["is_appendix"]: appendix_ptr += 1
-            
-            elif component == "quest":
-                import quest_parser
-                quests_data = quest_parser.get_quests_catalog(db_root)
-                
-                if quests_data:
-                    import quest_renderer
-                    for q in quests_data:
-                        processed_quests.append((q["name"], f"REF_QUEST_{q['raw_node'].tag}"))
+                        # Fallback to checking plural name (e.g., render_quests_appendix)
+                        if render_func is None:
+                            render_func_name = f"render_{component}s_appendix"
+                            render_func = getattr(renderer_module, render_func_name, None)
                         
-                    quest_template = rf.get_template_path("quest")
-                    print(f"[DIAGNOSTIC] Factory returned Quest template path: '{quest_template}'")
-                    
-                    if not quest_template or not os.path.exists(quest_template):
-                        print(f"[!] CONFIG ERROR: Quest blueprint file path invalid or missing in factory setup!")
-                        # Fallback path if factory lacks configuration entry
-                        quest_template = os.path.join("templates", "FS_Quest_Template.docx")
-                        print(f"    Attempting hardcoded workspace fallback layout path: '{quest_template}'")
-
-                    quest_renderer.render_quests_appendix(
-                        mod_zip=mod_zip,
-                        quests_data=quests_data,
-                        master_doc=doc,
-                        template_path=quest_template,
-                        appendix_label=current_appendix
-                    )
-                    if step["is_appendix"]: appendix_ptr += 1
-                else:
-                    print("[INFO] Quest block evaluated to empty or no <quest> elements found in database.")
-
+                        if render_func:
+                            # 4. Invoke the target renderer module execution pass
+                            render_func(mod_zip, data_payload, doc, template_file, current_appendix)
+                            if step["is_appendix"]: 
+                                appendix_ptr += 1
+                        else:
+                            print(f"[!] Engine Error: Could not find function '{f'render_{component}_appendix'}' or '{render_func_name}' inside module.")
+        
         # =====================================================================
         # 4.9 SAFE POST-PROCESS BLOCKMARK PASS
         # =====================================================================

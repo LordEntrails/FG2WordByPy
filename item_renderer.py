@@ -1,7 +1,5 @@
 import os
 import io
-import docx.oxml as oxml
-import docx.oxml.ns as ns
 from docx.shared import Inches
 from docxtpl import DocxTemplate, RichText
 from PIL import Image as PILImage
@@ -46,27 +44,12 @@ def render_item_appendix(mod_zip, items_data, master_doc, template_path, appendi
 
     for item in items_data:
         raw_node = item["raw_node"]
-        raw_id = raw_node.tag
-        bookmark_name = f"REF_ITEM_{raw_id}"
-
-        # --- INJECT INTERNAL LINK BOOKMARK ---
-        bookmark_subdoc = tpl.new_subdoc()
-        p_book = bookmark_subdoc.add_paragraph()
-        
-        b_start = oxml.shared.OxmlElement('w:bookmarkStart')
-        b_start.set(ns.qn('w:id'), raw_id.replace("id-", ""))
-        b_start.set(ns.qn('w:name'), bookmark_name)
-        p_book._p.append(b_start)
-        
-        b_end = oxml.shared.OxmlElement('w:bookmarkEnd')
-        b_end.set(ns.qn('w:id'), raw_id.replace("id-", ""))
-        p_book._p.append(b_end)
 
         # Handle Image Asset Injection
         pic_path = raw_node.findtext("picture") or ""
         item["picture"] = create_item_image_subdoc(tpl, mod_zip, pic_path, target_width=3.5)
 
-        # Handle RichText Descriptions
+        # Handle RichText Descriptions (Standardized to .description context key)
         desc_node = raw_node.find("item_description")
         if desc_node is not None and len(desc_node.findall('p')) > 0:
             rt = RichText()
@@ -77,9 +60,9 @@ def render_item_appendix(mod_zip, items_data, master_doc, template_path, appendi
                     rt.add(text)
                     if idx < len(paragraphs) - 1:
                         rt.add("\n\n") 
-            item["item_description"] = rt
+            item["description"] = rt
         else:
-            item["item_description"] = "No description cataloged."
+            item["description"] = "No description cataloged."
 
     context = {
         "items": items_data,
@@ -89,6 +72,8 @@ def render_item_appendix(mod_zip, items_data, master_doc, template_path, appendi
     try:
         tpl.render(context)
         for element in tpl.element.body:
+            if hasattr(element, 'tag') and element.tag.endswith('sectPr'):
+                continue
             master_doc.element.body.append(element)
         print("[SUCCESS] Equipment appendix compiled into chronicle workbook.")
         return True
