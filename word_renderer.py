@@ -61,7 +61,6 @@ def extract_and_insert_image(mod_zip, image_path, doc, target_width=3.5):
             image_stream = io.BytesIO(img_file.read())
             
         with Image.open(image_stream) as img:
-            # FIXED: Dynamically calculate pixel geometry to prevent squeezing/stretching
             width_px, height_px = img.size
             aspect_ratio = height_px / width_px
             target_height = target_width * aspect_ratio
@@ -75,7 +74,6 @@ def extract_and_insert_image(mod_zip, image_path, doc, target_width=3.5):
             p_img.paragraph_format.space_before = Inches(0.1)
             p_img.paragraph_format.space_after = Inches(0.1)
             
-            # Secure insertion with both width and height locked down
             p_img.add_run().add_picture(output_stream, width=Inches(target_width), height=Inches(target_height))
             return True
             
@@ -92,17 +90,13 @@ def insert_internal_hyperlink(paragraph, text, bookmark_name):
     Inserts a native Microsoft Word cross-reference hyperlink into a paragraph's
     run collection without corrupting underlying table cell element structures.
     """
-    # 1. Create a clean run to hold the text context
     run = paragraph.add_run()
-    
-    # 2. Build the OpenXML Hyperlink element structures safely
     hyperlink = oxml.shared.OxmlElement('w:hyperlink')
     hyperlink.set(ns.qn('w:anchor'), bookmark_name)
     
     new_run = oxml.shared.OxmlElement('w:r')
     rPr = oxml.shared.OxmlElement('w:rPr')
     
-    # Style styling parameters cleanly
     color = oxml.shared.OxmlElement('w:color')
     color.set(ns.qn('w:val'), '0000FF')
     rPr.append(color)
@@ -117,7 +111,6 @@ def insert_internal_hyperlink(paragraph, text, bookmark_name):
     new_run.append(text_node)
     hyperlink.append(new_run)
     
-    # 3. Secure insertion pass: Inject the node relative to the container run frame
     run._r.getparent().insert(run._r.getparent().index(run._r), hyperlink)
     return hyperlink
 
@@ -136,7 +129,6 @@ def embed_encounter_table(doc, record_name, xml_root):
     p_title = doc.add_paragraph()
     p_title.paragraph_format.space_before = Inches(0.15)
     p_title.paragraph_format.space_after = Inches(0.05)
-    # FIXED: Removed the sword icon from the title string array assignment pass
     p_title.add_run(f"Battle Deployment: {battle_name}").bold = True
     
     npclist = battle_node.find("npclist")
@@ -322,7 +314,6 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=
             apply_inline_styles(child, p)
 
         elif child.tag == 'image':
-            # Handle inline image elements cleanly using the passed mod_zip ref
             image_path = child.findtext("image") or ""
             if image_path and mod_zip is not None:
                 extract_and_insert_image(mod_zip, image_path, doc)
@@ -357,131 +348,33 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=
                 p = doc.add_paragraph(style=style)
                 
                 bookmark_name = ""
-                if "npc.id-" in record_name:
-                    bookmark_name = f"REF_NPC_{record_name.split('.')[-1]}"
-                elif "item.id-" in record_name:
-                    bookmark_name = f"REF_ITEM_{record_name.split('.')[-1]}"
-                elif "vehicle.id-" in record_name:
-                    bookmark_name = f"REF_VEHICLE_{record_name.split('.')[-1]}"
-                elif "location.id-" in record_name:
-                    bookmark_name = f"REF_LOCATION_{record_name.split('.')[-1]}"
-                elif "starships.id-" in record_name or "starship.id-" in record_name:
-                    bookmark_name = f"REF_STARSHIP_{record_name.split('.')[-1]}"
+                # Parse internal anchor bookmarks only if it's a native campaign asset (no '@' symbol)
+                if "@" not in record_name:
+                    if "npc.id-" in record_name:
+                        bookmark_name = f"REF_NPC_{record_name.split('.')[-1]}"
+                    elif "item.id-" in record_name:
+                        bookmark_name = f"REF_ITEM_{record_name.split('.')[-1]}"
+                    elif "vehicle.id-" in record_name:
+                        bookmark_name = f"REF_VEHICLE_{record_name.split('.')[-1]}"
+                    elif "location.id-" in record_name:
+                        bookmark_name = f"REF_LOCATION_{record_name.split('.')[-1]}"
+                    elif "starships.id-" in record_name or "starship.id-" in record_name:
+                        bookmark_name = f"REF_STARSHIP_{record_name.split('.')[-1]}"
                 
                 if bookmark_name:
                     insert_internal_hyperlink(p, link_text, bookmark_name)
                 else:
+                    # Write the baseline unlinked reference text run
                     p.add_run(link_text)
-                
-        elif child.tag == 'table':
-            xml_rows = child.findall('tr')
-            if xml_rows:
-                max_cols = max((len(r.findall('td')) + len(r.findall('th'))) for r in xml_rows)
-                word_table = doc.add_table(rows=len(xml_rows), cols=max_cols)
-                
-                word_table.style = 'Grid Table 4 Accent 1'
-                word_table.header_row = True
-                word_table.row_banding = True
-                word_table.first_column = False
-                word_table.last_column = False
-                word_table.column_banding = False
-                
-                for r_idx, xml_row in enumerate(xml_rows):
-                    cells = xml_row.findall('td') + xml_row.findall('th')
-                    for c_idx, cell in enumerate(cells):
-                        if c_idx >= max_cols:
-                            continue
-                            
-                        word_cell = word_table.cell(r_idx, c_idx)
-                        word_cell.text = clean_xml_text(cell)
-                        
-                        for paragraph in word_cell.paragraphs:
-                            paragraph.style = get_safe_style(doc, 'Normal')
-                            if r_idx == 0:
-                                for run in paragraph.runs:
-                                    run.bold = True
-    if xml_node is None:
-        return
-    for child in xml_node:
-        if child.tag == 'p':
-            if block_type == 'frame' or xml_node.tag == 'frame':
-                style = get_safe_style(doc, 'Chat Paragraph', 'Normal')
-                p = doc.add_paragraph(style=style)
-                apply_inline_styles(child, p)
-            else:
-                p = doc.add_paragraph(style=get_safe_style(doc, 'Normal'))
-                apply_inline_styles(child, p)
-                
-        elif child.tag == 'h':
-            p = doc.add_paragraph(style=get_safe_style(doc, 'Heading 5'))
-            p.add_run(clean_xml_text(child))
-            
-        elif child.tag == 'frame':
-            style = get_safe_style(doc, 'Chat Paragraph', 'Normal')
-            p = doc.add_paragraph(style=style)
-            apply_inline_styles(child, p)
-            
-        elif child.tag == 'li':
-            p = doc.add_paragraph(style=get_safe_style(doc, 'List Paragraph'))
-            p.add_run("•\t")
-            apply_inline_styles(child, p)
-
-        elif child.tag == 'image':
-            # 1. Look for the relative path tag inside the image block
-            image_path = child.findtext("image") or ""
-            if image_path:
-                # 2. Extract, format, scale to 3.5" wide, and stream into the active document context
-                extract_and_insert_image(mod_zip, image_path, doc)
-                
-                # 3. Check for an optional caption block beneath the asset log
-                caption_text = clean_xml_text(child.find("caption"))
-                if caption_text:
-                    p_cap = doc.add_paragraph()
-                    p_cap.alignment = 1  # Center aligned
-                    p_cap.paragraph_format.space_before = Inches(0.02)
-                    p_cap.paragraph_format.space_after = Inches(0.1)
-                    run_cap = p_cap.add_run(caption_text)
-                    run_cap.italic = True
-                    run_cap.font.size = docx.shared.Pt(10)
-
-        elif child.tag in ['linklist', 'link']:
-            links = child.findall('link') if child.tag == 'linklist' else [child]
-            for link in links:
-                link_class = link.get("class") or ""
-                record_name = link.get("recordname") or link.text or ""
-                link_text = clean_xml_text(link)
-                
-                if link_class == "battle":
-                    success = embed_encounter_table(doc, record_name, xml_root)
-                    if success:
-                        continue
-                        
-                if link_class == "treasureparcel":
-                    success = embed_parcel_table(doc, record_name, xml_root)
-                    if success:
-                        continue
-                
-                style = get_safe_style(doc, 'Internal Link', 'Normal')
-                p = doc.add_paragraph(style=style)
-                
-                # FIXED: Stripped the hardcoded "o\t" string to eliminate the double bullet layout glitch
-                bookmark_name = ""
-                if "npc.id-" in record_name:
-                    bookmark_name = f"REF_NPC_{record_name.split('.')[-1]}"
-                elif "item.id-" in record_name:
-                    bookmark_name = f"REF_ITEM_{record_name.split('.')[-1]}"
-                elif "vehicle.id-" in record_name:
-                    bookmark_name = f"REF_VEHICLE_{record_name.split('.')[-1]}"
-                elif "location.id-" in record_name:
-                    bookmark_name = f"REF_LOCATION_{record_name.split('.')[-1]}"
-                elif "starships.id-" in record_name or "starship.id-" in record_name:
-                    bookmark_name = f"REF_STARSHIP_{record_name.split('.')[-1]}"
-                
-                if bookmark_name:
-                    insert_internal_hyperlink(p, link_text, bookmark_name)
-                else:
-                    p.add_run(link_text)
-                
+                    
+                    # SYSTEM CHRONICLE EXTENSION: Capture external library module tracking nodes
+                    if "@" in record_name:
+                        external_source = record_name.split("@")[-1].replace("_", " ").strip()
+                        if external_source:
+                            # Add spacing and append the source text run styled in clean italics
+                            run_source = p.add_run(f" (See: {external_source})")
+                            run_source.italic = True
+                                    
         elif child.tag == 'table':
             xml_rows = child.findall('tr')
             if xml_rows:

@@ -143,26 +143,10 @@ def main():
                                     if header_text:
                                         doc.add_paragraph(header_text, style=word_renderer.get_safe_style(doc, 'Heading 4'))
                                 
-                                # Process Standard Formatted Text Blocks
-                                text_node = block.find("text[@type='formattedtext']")
+                                # SINGLE SOURCE OF TRUTH: Let the formatted text handler process the block elements natively
+                                text_node = block.find("text[@type='formattedtext']") or block.find("image")
                                 if text_node is not None:
                                     word_renderer.write_formatted_text(text_node, doc, block_type=block_type, xml_root=db_root, mod_zip=mod_zip)
-
-                                # FIXED: Extract and scale standalone image blocks inside RefManual layout frames
-                                if block_type == 'image':
-                                    image_tag = block.find(".//image")
-                                    if image_tag is not None:
-                                        bitmap_path = image_tag.findtext(".//bitmap") or ""
-                                        if bitmap_path:
-                                            word_renderer.extract_and_insert_image(mod_zip, bitmap_path, doc)
-                                            
-                                            caption_text = fg_parser.clean_xml_text(image_tag.find(".//caption"))
-                                            if caption_text:
-                                                p_cap = doc.add_paragraph()
-                                                p_cap.alignment = 1
-                                                run_cap = p_cap.add_run(caption_text)
-                                                run_cap.italic = True
-
             else:
                 # DYNAMICAL ROUTING FOR ALL APPENDICES
                 data_payload = rf.execute_parser(component, db_root)
