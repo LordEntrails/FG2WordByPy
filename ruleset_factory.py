@@ -33,9 +33,9 @@ class RulesetFactory:
         Safely routes legacy CoreRPG components to fg_parser if independent files are missing.
         """
         if component_name == "vehicle":
-            module_name = "fs_vehicle_parser"
+            module_name = "vehicle_parser"
         elif component_name == "starship":
-            module_name = "fs_starships_parser"
+            module_name = "starship_parser"
         elif component_name == "npc":
             module_name = "npc_parser" 
         elif component_name == "item":

@@ -305,11 +305,29 @@ def embed_parcel_table(doc, record_name, xml_root):
     return True
 
 def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=None):
-    """
-    Interprets and renders formatted text, headers, links, and inline images.
-    """
     if xml_node is None:
         return
+        
+    # FIXED: Handle blocks where the element root context itself contains the image reference[cite: 26]
+    if block_type in ["image", "imageright", "imageleft"] or xml_node.tag == "image":
+        bitmap_node = xml_node.find(".//bitmap")
+        image_path = bitmap_node.text.strip() if bitmap_node is not None and bitmap_node.text else ""
+        if not image_path:
+            image_path = xml_node.findtext("image") or ""
+            
+        if image_path and mod_zip is not None:
+            if "@" in image_path:
+                image_path = image_path.split("@")[0]
+            extract_and_insert_image(mod_zip, image_path, doc)
+            
+            caption_text = clean_xml_text(xml_node.find("caption"))
+            if caption_text:
+                p_cap = doc.add_paragraph()
+                p_cap.alignment = 1
+                p_cap.add_run(caption_text).italic = True
+            return
+                
+    # Keep the baseline child element parsing loop intact for all text elements below...[cite: 26]
     for child in xml_node:
         if child.tag == 'p':
             if block_type == 'frame' or xml_node.tag == 'frame':
@@ -336,7 +354,14 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=
 
         elif child.tag == 'image':
             image_path = child.findtext("image") or ""
+            if not image_path:
+                bitmap_node = child.find(".//bitmap")
+                if bitmap_node is not None:
+                    image_path = bitmap_node.text or ""
+
             if image_path and mod_zip is not None:
+                if "@" in image_path:
+                    image_path = image_path.split("@")[0]
                 extract_and_insert_image(mod_zip, image_path, doc)
                 
                 caption_text = clean_xml_text(child.find("caption"))
@@ -369,7 +394,6 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=
                 p = doc.add_paragraph(style=style)
                 
                 bookmark_name = ""
-                # Parse internal anchor bookmarks only if it's a native campaign asset (no '@' symbol)
                 if "@" not in record_name:
                     if "npc.id-" in record_name:
                         bookmark_name = f"REF_NPC_{record_name.split('.')[-1]}"
@@ -385,14 +409,11 @@ def write_formatted_text(xml_node, doc, block_type=None, xml_root=None, mod_zip=
                 if bookmark_name:
                     insert_internal_hyperlink(p, link_text, bookmark_name)
                 else:
-                    # Write the baseline unlinked reference text run
                     p.add_run(link_text)
                     
-                    # SYSTEM CHRONICLE EXTENSION: Capture external library module tracking nodes
                     if "@" in record_name:
                         external_source = record_name.split("@")[-1].replace("_", " ").strip()
                         if external_source:
-                            # Add spacing and append the source text run styled in clean italics
                             run_source = p.add_run(f" (See: {external_source})")
                             run_source.italic = True
 
